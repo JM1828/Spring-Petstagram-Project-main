@@ -53,7 +53,7 @@ public class UserService {
                         userDTO.getPassword()));
 
         // 이메일로 사용자 조회
-        UserEntity user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow();
+        UserEntity user = userRepository.findByEmail(userDTO.getEmail());
 
         // 조회된 사용자 정보를 바탕으로 JWT 토큰 생성
         String jwt = jwtUtils.generateToken(user);
@@ -79,7 +79,7 @@ public class UserService {
         String ourEmail = jwtUtils.extractUsername(userDTO.getToken());
 
         // 이메일로 사용자 정보 조회, 없으면 예외 발생
-        UserEntity users = userRepository.findByEmail(ourEmail).orElseThrow();
+        UserEntity users = userRepository.findByEmail(ourEmail);
 
         // 토큰 유효성 검사 후 유효하다면 새로운 토큰 생성
         if (jwtUtils.isTokenValid(userDTO.getToken(), users)) {
@@ -130,9 +130,7 @@ public class UserService {
 
     // 회원 마이페이지
     public UserDTO getMyInfo(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다: " + email));
-
+        UserEntity userEntity = userRepository.findByEmail(email);
         return UserDTO.toDTO(userEntity);
     }
 

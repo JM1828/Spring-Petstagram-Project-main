@@ -38,8 +38,8 @@ public class PostService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // 현재 로그인한 사용자의 이름을 DB 에서 가져옴
-        UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("조회한 유저가 없습니다."));
+        UserEntity userEntity = userRepository.findByEmail(username);
+
 
         // DTO -> Entity
         PostEntity postEntity = PostEntity.toEntity(dto);
