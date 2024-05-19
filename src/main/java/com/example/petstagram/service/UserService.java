@@ -29,9 +29,9 @@ public class UserService {
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        if (userRepository.existsByNickName(userDTO.getNickName())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-        }
+//        if (userRepository.existsByNickName(userDTO.getNickName())) {
+//            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+//        }
 
         // UserDTO 를 UserEntity 로 변환
         UserEntity userEntity = UserEntity.toEntity(userDTO, bCryptPasswordEncoder);

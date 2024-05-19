@@ -57,7 +57,7 @@ public class PostService {
         postRepository.save(postEntity);
     }
 
-    // 게시글 리스트 및 좋아요 개수 조회
+    // 게시글 리스트 및 좋아요 개수, 댓글 개수 조회
     @Transactional(readOnly = true)
     public List<PostDTO> getPostList() {
         List<PostEntity> postEntityList = postRepository.findAllByOrderByIdDesc();
@@ -77,7 +77,7 @@ public class PostService {
         }).collect(Collectors.toList());
     }
 
-    // 게시글 상세보기
+    // 게시글 상세보기 및 좋아요 개수, 댓글 개수 조회
     @Transactional(readOnly = true)
     public PostDTO readPost(Long postId) {
         // 게시글 ID로 게시물 찾기
@@ -98,7 +98,7 @@ public class PostService {
         return postDTO;
     }
 
-    // 사용자가 작성한 모든 게시물 및 좋아요 개수 조회
+    // 사용자가 작성한 모든 게시물 및 좋아요 개수, 댓글 개수 조회
     @Transactional(readOnly = true)
     public List<PostDTO> getPostsByUserId(Long userId) {
         List<PostEntity> postEntityList = postRepository.findByUserId(userId);
