@@ -29,9 +29,11 @@ public class UserEntity implements UserDetails {
     private String email;
     private String name;
     private String password;
-    private String nickName;
     private String profilePicture;
     private String role = "USER";
+    private String gender; // 성별
+    private String bio; // 사용자 소개
+    private boolean isRecommend = false; // 추천 여부, 기본값은 false
 
     // 사용자와 게시물은 일대다 관계
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -51,9 +53,11 @@ public class UserEntity implements UserDetails {
                 .email(userDTO.getEmail())
                 .name(userDTO.getName())
                 .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
-                .nickName(userDTO.getNickName())
                 .profilePicture(userDTO.getProfilePicture())
                 .role(userDTO.getRole())
+                .gender(userDTO.getGender())
+                .bio(userDTO.getBio())
+                .isRecommend(userDTO.isRecommend())
                 .build();
     }
 

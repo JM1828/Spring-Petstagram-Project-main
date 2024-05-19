@@ -31,7 +31,7 @@ public class PostDTO {
         return PostDTO.builder()
                 .id(postEntity.getId())
                 .postContent(postEntity.getPostContent())
-                .postNickName(postEntity.getUser().getNickName())
+                .postNickName(postEntity.getUser().getEmail())
                 .imageList(postEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))

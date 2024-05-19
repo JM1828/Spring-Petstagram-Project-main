@@ -14,17 +14,10 @@ public class PostLikeController {
 
     private final PostLikeService postLikeService;
 
-    // 게시물 좋아요 추가
-    @PostMapping("/post/add/{postId}")
-    public ResponseEntity<String> addPostLike(@PathVariable("postId") Long postId, @AuthenticationPrincipal UserEntity user) {
-        postLikeService.addPostLike(postId, user.getId());
-        return ResponseEntity.ok("좋아요가 추가되었습니다.");
-    }
-
-    // 게시물 좋아요 삭제
-    @DeleteMapping("/post/remove/{postId}")
-    public ResponseEntity<String> removePostLike(@PathVariable("postId") Long postId, @AuthenticationPrincipal UserEntity user) {
-        postLikeService.removePostLike(postId, user.getId());
-        return ResponseEntity.ok("좋아요가 취소되었습니다.");
+    // 게시물 좋아요 추가 및 삭제
+    @PostMapping("/post/toggle/{postId}")
+    public ResponseEntity<String> togglePostLike(@PathVariable("postId") Long postId, @AuthenticationPrincipal UserEntity user) {
+        postLikeService.togglePostLike(postId, user.getId());
+        return ResponseEntity.ok("게시물에 좋아요가 추가되었습니다.");
     }
 }

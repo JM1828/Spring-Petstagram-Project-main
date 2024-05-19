@@ -4,6 +4,7 @@ import com.example.petstagram.dto.CommentDTO;
 import com.example.petstagram.entity.CommentEntity;
 import com.example.petstagram.entity.PostEntity;
 import com.example.petstagram.entity.UserEntity;
+import com.example.petstagram.repository.CommentLikeRepository;
 import com.example.petstagram.repository.CommentRepository;
 import com.example.petstagram.repository.PostRepository;
 import com.example.petstagram.repository.UserRepository;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -52,11 +54,19 @@ public class CommentService {
         return savedEntity.getId();
     }
 
-    // 댓글 리스트 조회
+    // 댓글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentList(Long postId) {
-        List<CommentEntity> commentList = commentRepository.findByPost_id(postId);
-        return commentList.stream().map(CommentDTO::toDTO).collect(Collectors.toList());
+        List<CommentEntity> commentList = commentRepository.findByPostId(postId);
+        return commentList.stream().map(commentEntity -> {
+            CommentDTO commentDTO = CommentDTO.toDTO(commentEntity);
+
+            // 특정 게시물에 대한 좋아요 개수 조회
+            long likesCount = commentLikeRepository.countByComment(commentEntity);
+            commentDTO.setCommentLikesCount(likesCount);
+
+            return commentDTO;
+        }).collect(Collectors.toList());
     }
 
     // 댓글 수정
@@ -96,10 +106,5 @@ public class CommentService {
 
         // 인증된 사용자가 소유자일 경우, 댓글 삭제
         commentRepository.deleteById(commentId);
-    }
-
-    // 댓글 갯수
-    public long countComment(long postId) {
-        return commentRepository.countByPostId(postId);
     }
 }

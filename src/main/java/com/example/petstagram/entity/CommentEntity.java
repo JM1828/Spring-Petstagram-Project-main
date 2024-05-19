@@ -2,6 +2,7 @@ package com.example.petstagram.entity;
 
 import com.example.petstagram.dto.CommentDTO;
 import com.example.petstagram.entity.baseEntity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,16 +32,19 @@ public class CommentEntity extends BaseEntity {
     // 댓글과 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY 는 지연 로딩을 의미
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private UserEntity user; // 댓글 작성자의 식별자.
 
     // 댓글과 게시물은 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY 는 지연 로딩을 의미
     @JoinColumn(name = "post_id")
+    @JsonIgnore
     private PostEntity post; // 댓글이 속한 게시글.
 
     // 댓글과 좋아요 수는 일대다 관계
-    @OneToMany(mappedBy = "comment")
-    private Set<PostLikeEntity> likeList = new HashSet<>();
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<CommentLikeEntity> commentLikeList = new HashSet<>();
 
     // DTO -> Entity
     public static CommentEntity toEntity(CommentDTO dto) {
@@ -52,8 +56,8 @@ public class CommentEntity extends BaseEntity {
 
     // == 연관관계 편의 메서드 == //
     // 댓글 좋아요를 추가하는 메서드
-    public void addLike(PostLikeEntity postLikeEntity) {
-        this.likeList.add(postLikeEntity);
-        postLikeEntity.setComment(this); // 댓글에 좋아요 설정
+    public void addCommentLike(CommentLikeEntity commentLikeEntity) {
+        this.commentLikeList.add(commentLikeEntity);
+        commentLikeEntity.setComment(this); // 댓글에 좋아요 설정
     }
 }

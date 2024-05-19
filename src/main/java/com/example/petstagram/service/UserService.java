@@ -102,14 +102,14 @@ public class UserService {
         if (!userEntity.getEmail().equals(userDTO.getEmail()) && userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        // 현재 사용자의 닉네임과 수정하려는 닉네임이 다르면서, 수정하려는 닉네임이 이미 사용 중인지 확인
-        if (!userEntity.getNickName().equals(userDTO.getNickName()) && userRepository.existsByNickName(userDTO.getNickName())) { // 닉네임 중복 검사 추가
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-        }
+//        // 현재 사용자의 닉네임과 수정하려는 닉네임이 다르면서, 수정하려는 닉네임이 이미 사용 중인지 확인
+//        if (!userEntity.getNickName().equals(userDTO.getNickName()) && userRepository.existsByNickName(userDTO.getNickName())) { // 닉네임 중복 검사 추가
+//            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+//        }
 
         userEntity.setEmail(userDTO.getEmail());
         userEntity.setName(userDTO.getName());
-        userEntity.setNickName(userDTO.getNickName());
+//        userEntity.setNickName(userDTO.getNickName());
 
         // userDTO 의 비밀번호가 null 이 아니고, 비어있지 않은 경우에만 업데이트
         // 새 비밀번호는 bCryptPasswordEncoder 를 사용하여 암호화

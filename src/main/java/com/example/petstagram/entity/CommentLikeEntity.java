@@ -7,22 +7,20 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "postLikes")
-public class PostLikeEntity {
+@Table(name = "commentLikes")
+public class CommentLikeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private boolean isActive; // 좋아요 상태 플래그
-
-    // 좋아요 수와 게시물 사용자는 다대일 관계
+    // 좋아요 수와 댓글 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    // 좋아요 수와 게시물은 다대일 관계
+    // 좋아요 수와 댓글은 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private PostEntity post;
+    @JoinColumn(name = "comment_id")
+    private CommentEntity comment;
 }

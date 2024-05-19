@@ -2,6 +2,7 @@ package com.example.petstagram.entity;
 
 import com.example.petstagram.dto.PostDTO;
 import com.example.petstagram.entity.baseEntity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class PostEntity extends BaseEntity {
     // 게시물과 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY 는 지연 로딩을 의미
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private UserEntity user; // 게시물 작성자의 식별자.
 
     // 게시물과 이미지는 일대다 관계
@@ -42,6 +44,7 @@ public class PostEntity extends BaseEntity {
 
     // 게시물과 좋아요 수는 일대다 관계
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<PostLikeEntity> postLikeList = new HashSet<>();
 
     // DTO -> Entity

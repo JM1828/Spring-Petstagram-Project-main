@@ -46,11 +46,4 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("댓글 삭제에 실패헀습니다.");
         }
     }
-
-    // 댓글 갯수
-    @GetMapping("/count/{postId}")
-    public ResponseEntity<Long> countComment(@PathVariable("postId") long postId) {
-        long countComment = commentService.countComment(postId);
-        return ResponseEntity.ok(countComment);
-    }
 }

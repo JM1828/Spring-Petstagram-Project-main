@@ -1,12 +1,10 @@
 package com.example.petstagram.dto;
 
 import com.example.petstagram.entity.CommentEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +13,8 @@ public class CommentDTO {
 
     private String commentContent; // 댓글 내용.
 
+    private long commentLikesCount; // 댓글의 좋아요 수.
+
     private String commentNickName; // 댓글을 작성한 사용자 닉네임
 
     // Entity -> DTO
@@ -22,7 +22,7 @@ public class CommentDTO {
         return CommentDTO.builder()
                 .id(commentEntity.getId())
                 .commentContent(commentEntity.getCommentContent())
-                .commentNickName(commentEntity.getUser().getNickName())
+                .commentNickName(commentEntity.getUser().getEmail())
                 .build();
     }
 }
