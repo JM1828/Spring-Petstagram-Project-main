@@ -1,7 +1,7 @@
 package com.example.petstagram.config;
 
 
-import com.example.petstagram.service.userService.OurUserDetailsService;
+import com.example.petstagram.service.utils.OurUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

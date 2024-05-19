@@ -1,8 +1,8 @@
 package com.example.petstagram.config;
 
 
-import com.example.petstagram.service.userService.JWTUtils;
-import com.example.petstagram.service.userService.OurUserDetailsService;
+import com.example.petstagram.service.utils.JWTUtils;
+import com.example.petstagram.service.utils.OurUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private OurUserDetailsService ourUserDetailsService;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
