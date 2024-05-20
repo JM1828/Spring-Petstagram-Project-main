@@ -16,8 +16,8 @@ public class PostLikeController {
 
     // 게시물 좋아요 추가 및 삭제
     @PostMapping("/post/toggle/{postId}")
-    public ResponseEntity<String> togglePostLike(@PathVariable("postId") Long postId, @AuthenticationPrincipal UserEntity user) {
-        postLikeService.togglePostLike(postId, user.getId());
+    public ResponseEntity<String> togglePostLike(@PathVariable("postId") Long postId) {
+        postLikeService.togglePostLike(postId);
         return ResponseEntity.ok("게시물에 좋아요가 추가되었습니다.");
     }
 }

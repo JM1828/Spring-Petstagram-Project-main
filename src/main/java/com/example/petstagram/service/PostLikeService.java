@@ -7,6 +7,7 @@ import com.example.petstagram.repository.PostLikeRepository;
 import com.example.petstagram.repository.PostRepository;
 import com.example.petstagram.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +23,15 @@ public class PostLikeService {
 
     // 게시물 좋아요 추가 또는 삭제
     @Transactional
-    public void togglePostLike(Long postId, Long userId) {
+    public void togglePostLike(Long postId) {
 
         // 게시물 찾기
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        // 사용자 찾기
-        UserEntity user = userRepository.findById(userId)
+        // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 좋아요가 이미 있는지 확인
@@ -43,7 +45,6 @@ public class PostLikeService {
             PostLikeEntity postLikeEntity = new PostLikeEntity();
             postLikeEntity.setPost(post);
             postLikeEntity.setUser(user);
-            postLikeEntity.setActive(true); // 활성 상태로 설정
             postLikeRepository.save(postLikeEntity);
         }
     }
