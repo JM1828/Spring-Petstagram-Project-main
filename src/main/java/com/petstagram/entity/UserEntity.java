@@ -36,19 +36,47 @@ public class UserEntity implements UserDetails {
     private String bio; // 사용자 소개
     private Boolean isRecommend; // 추천 여부, 기본값은 false
 
-
     // 사용자와 게시물은 일대다 관계
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEntity> postList = new ArrayList<>();
 
+    // 사용자와 댓글은 일대다 관계
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentEntity> commentList = new ArrayList<>();
+
+    // 사용자와 프로필 사진은 일대일 관계
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private ProfileImageEntity profileImage;
+
+    // 사용자와 메시지는 일대다 관계
+    @OneToMany(mappedBy = "sender")
+    private List<MessageEntity> sentMessages = new ArrayList<>(); // 메시지를 보낸 사용자의 식별자.
+    @OneToMany(mappedBy = "receiver")
+    private List<MessageEntity> receivedMessages = new ArrayList<>(); // 메시지를 받은 사용자의 식별자.
 
     // == 연관관계 편의 메서드 == //
     // 게시물 관련 메서드
     public void addPost(PostEntity post) {
         postList.add(post);
         post.setUser(this);
+    }
+
+    // 댓글 관련 메서드
+    public void addComment(CommentEntity comment) {
+        commentList.add(comment);
+        comment.setUser(this);
+    }
+
+    // 메시지 보내기 관련 메서드
+    public void addSentMessage(MessageEntity message) {
+        sentMessages.add(message);
+        message.setSender(this);
+    }
+
+    // 메시지 받기 관련 메서드
+    public void addReceivedMessage(MessageEntity message) {
+        receivedMessages.add(message);
+        message.setReceiver(this);
     }
 
     // DTO -> Entity

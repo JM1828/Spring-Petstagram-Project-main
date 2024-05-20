@@ -13,9 +13,10 @@ public class CommentDTO {
 
     private String commentContent; // 댓글 내용.
 
+    private String commentEmail; // 댓글을 작성한 사용자 이메일
+
     private long commentLikesCount; // 댓글의 좋아요 수.
 
-    private String commentEmail; // 댓글을 작성한 사용자 이메일
 
     // Entity -> DTO
     public static CommentDTO toDTO(CommentEntity commentEntity) {

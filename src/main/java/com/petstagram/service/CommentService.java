@@ -47,6 +47,9 @@ public class CommentService {
         // 게시글에 댓글 추가
         post.addComment(commentEntity);
 
+        // 사용자가 작성한 댓글을 사용자의 댓글 목록에 추가
+        currentUser.addComment(commentEntity);
+
         // 댓글 저장
         CommentEntity savedEntity = commentRepository.save(commentEntity);
 
