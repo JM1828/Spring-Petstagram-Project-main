@@ -1,5 +1,7 @@
 package com.example.petstagram.controller;
 
+import com.example.petstagram.dto.PostDTO;
+import com.example.petstagram.dto.PostLikeDTO;
 import com.example.petstagram.entity.UserEntity;
 import com.example.petstagram.service.PostLikeService;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +21,12 @@ public class PostLikeController {
     public ResponseEntity<String> togglePostLike(@PathVariable("postId") Long postId) {
         postLikeService.togglePostLike(postId);
         return ResponseEntity.ok("게시물에 좋아요가 추가되었습니다.");
+    }
+
+    // 게시물 좋아요 상태 조회
+    @GetMapping("/post/status/{postId}")
+    public ResponseEntity<PostLikeDTO> getPostLikeStatus(@PathVariable("postId") Long postId) {
+        PostLikeDTO likeStatus = postLikeService.getPostLikeStatus(postId);
+            return ResponseEntity.ok(likeStatus);
     }
 }

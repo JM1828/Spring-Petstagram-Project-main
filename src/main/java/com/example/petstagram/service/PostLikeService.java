@@ -1,5 +1,7 @@
 package com.example.petstagram.service;
 
+import com.example.petstagram.dto.PostDTO;
+import com.example.petstagram.dto.PostLikeDTO;
 import com.example.petstagram.entity.PostLikeEntity;
 import com.example.petstagram.entity.PostEntity;
 import com.example.petstagram.entity.UserEntity;
@@ -47,5 +49,29 @@ public class PostLikeService {
             postLikeEntity.setUser(user);
             postLikeRepository.save(postLikeEntity);
         }
+    }
+
+    // 게시물 좋아요 상태 조회
+    public PostLikeDTO getPostLikeStatus(Long postId) {
+        // 게시물 찾기
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 해당 게시물에 대한 사용자의 좋아요 여부 확인
+        boolean isLiked = postLikeRepository.findByPostAndUser(post, user).isPresent();
+
+        // 해당 게시물의 총 좋아요 수 계산
+        long likeCount = postLikeRepository.countByPost(post);
+
+        // PostDTO 객체 생성 및 반환
+        PostLikeDTO postLikeDTO = new PostLikeDTO();
+        postLikeDTO.setLiked(isLiked);
+        postLikeDTO.setLikesCount(likeCount);
+        return postLikeDTO;
     }
 }
