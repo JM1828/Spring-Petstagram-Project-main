@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/chatRooms")
+@RequestMapping("/user")
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-    @PostMapping
+    @PostMapping("/chatRooms")
     public ResponseEntity<ChatRoomEntity> createChatRoom(@RequestBody ChatRoomDTO chatRoomDTO) {
         ChatRoomEntity newChatRoom = chatRoomService.createChatRoom(chatRoomDTO);
         return ResponseEntity.ok(newChatRoom);
     }
 
-    @PostMapping("/join/{roomId}")
+    @PostMapping("/chatRooms/join/{roomId}")
     public ResponseEntity<ChatRoomEntity> addUserToChatRoom(@PathVariable Long roomId) {
         ChatRoomEntity updatedChatRoom = chatRoomService.addUserToChatRoom(roomId);
         return ResponseEntity.ok(updatedChatRoom);

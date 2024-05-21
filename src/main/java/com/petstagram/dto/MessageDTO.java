@@ -1,5 +1,6 @@
 package com.petstagram.dto;
 
+import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.MessageEntity;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class MessageDTO {
     private String messageType; // 메시지 유형
     private String senderEmail; // 메세지를 작성한 사용자 이메일
     private String receiverEmail; // 메세지를 작성한 사용자 이메일
+    private ChatRoomEntity chatRoomId;
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {

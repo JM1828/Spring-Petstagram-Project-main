@@ -36,13 +36,14 @@ public class ChatRoomEntity {
             joinColumns = @JoinColumn(name = "chatRoom_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<UserEntity> users = new HashSet<>();
-
+    private Set<UserEntity> user = new HashSet<>();
 
     // DTO -> Entity
-    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO) {
+    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, Set<UserEntity> userEntities) {
         return ChatRoomEntity.builder()
                 .roomName(chatRoomDTO.getRoomName())
+                .messages(new ArrayList<>())
+                .user(userEntities)
                 .build();
     }
 }
