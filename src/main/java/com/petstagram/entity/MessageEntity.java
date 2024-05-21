@@ -33,6 +33,11 @@ public class MessageEntity extends BaseEntity{
     @JoinColumn(name = "receiverUser_id")
     private UserEntity receiver; // 메시지를 받은 사용자의 식별자.
 
+    // 메시지와 채팅룸은 다대일 관계
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chatRoom_id")
+    private ChatRoomEntity chatRoom;
+
     // 메시지와 이미지는 일대다 관계
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageList = new ArrayList<>();

@@ -68,4 +68,18 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("게시글 삭제에 실패헀습니다.");
         }
     }
+
+    // 게시물 좋아요 추가 및 삭제
+    @PostMapping("/toggle/{postId}")
+    public ResponseEntity<String> togglePostLike(@PathVariable("postId") Long postId) {
+        postService.togglePostLike(postId);
+        return ResponseEntity.ok("게시물에 좋아요가 추가되었습니다.");
+    }
+
+    // 게시물 좋아요 상태 조회
+    @GetMapping("/status/{postId}")
+    public ResponseEntity<PostDTO> getPostLikeStatus(@PathVariable("postId") Long postId) {
+        PostDTO likeStatus = postService.getPostLikeStatus(postId);
+        return ResponseEntity.ok(likeStatus);
+    }
 }

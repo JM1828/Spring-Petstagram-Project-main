@@ -3,6 +3,7 @@ package com.petstagram.service;
 import com.petstagram.dto.PostDTO;
 import com.petstagram.entity.ImageEntity;
 import com.petstagram.entity.PostEntity;
+import com.petstagram.entity.PostLikeEntity;
 import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.PostLikeRepository;
 import com.petstagram.repository.PostRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -141,5 +143,60 @@ public class PostService {
 
         // 인증된 사용자가 소유자일 경우, 게시글 삭제
         postRepository.deleteById(postId);
+    }
+
+    // 게시물 좋아요 추가 또는 삭제
+    @Transactional
+    public void togglePostLike(Long postId) {
+
+        // 게시물 찾기
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 좋아요가 이미 있는지 확인
+        Optional<PostLikeEntity> postLikeOpt  = postLikeRepository.findByPostAndUser(post, user);
+
+        if (postLikeOpt.isPresent()) {
+            // 좋아요 엔티티가 존재한다면, 상태를 false로 설정하고 타임스탬프 업데이트
+            PostLikeEntity postLikeEntity = postLikeOpt.get();
+            postLikeEntity.setPostStatus(!postLikeEntity.isPostStatus());
+            postLikeRepository.delete(postLikeEntity);
+        } else {
+            // 좋아요가 없다면 추가
+            PostLikeEntity postLikeEntity = new PostLikeEntity();
+            postLikeEntity.setPost(post);
+            postLikeEntity.setUser(user);
+            postLikeEntity.setPostStatus(true);
+            postLikeRepository.save(postLikeEntity);
+        }
+    }
+
+    // 게시물 좋아요 상태 조회
+    public PostDTO getPostLikeStatus(Long postId) {
+        // 게시물 찾기
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 해당 게시물에 대한 사용자의 좋아요 여부 확인
+        boolean isLiked = postLikeRepository.findByPostAndUser(post, user).isPresent();
+
+        // 해당 게시물의 총 좋아요 수 계산
+        long likeCount = postLikeRepository.countByPost(post);
+
+        // PostDTO 객체 생성 및 반환
+        PostDTO postDTO = new PostDTO();
+        postDTO.setPostLiked(isLiked);
+        postDTO.setPostLikesCount(likeCount);
+        return postDTO;
     }
 }
