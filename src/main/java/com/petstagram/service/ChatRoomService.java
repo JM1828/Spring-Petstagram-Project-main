@@ -71,7 +71,7 @@ public class ChatRoomService {
         List<MessageEntity> messages = messageRepository.findByChatRoomId(roomId);
 
         // 채팅방 엔티티에 메시지 목록 설정
-        chatRoom.setMessages(messages);
+        chatRoom.addMessages(messages);
 
         // ChatRoomDTO 변환 (메시지 목록 포함)
         return ChatRoomDTO.toDTO(chatRoom);
