@@ -15,8 +15,8 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @PostMapping("/chatRooms")
-    public ResponseEntity<ChatRoomEntity> createChatRoom(@RequestBody ChatRoomDTO chatRoomDTO) {
-        ChatRoomEntity newChatRoom = chatRoomService.createChatRoom(chatRoomDTO);
+    public ResponseEntity<ChatRoomDTO> createChatRoom(@RequestBody ChatRoomDTO chatRoomDTO) {
+        ChatRoomDTO newChatRoom = chatRoomService.createChatRoom(chatRoomDTO);
         return ResponseEntity.ok(newChatRoom);
     }
 

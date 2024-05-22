@@ -40,7 +40,6 @@ public class MessageService {
 
         // DTO 를 Entity 로 변환하고 사용자 정보 설정
         MessageEntity messageEntity = MessageEntity.toEntity(messageDTO);
-        log.info("메시지 안나와용 {}", messageEntity);
         messageEntity.setSender(sender);
         messageEntity.setReceiver(receiver);
 

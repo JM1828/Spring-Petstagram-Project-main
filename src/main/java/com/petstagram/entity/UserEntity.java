@@ -47,7 +47,7 @@ public class UserEntity implements UserDetails {
     private ProfileImageEntity profileImage;
 
     // 채팅방과 사용자는 다대다 관계
-    @ManyToMany(mappedBy = "user")
+    @ManyToMany(mappedBy = "users")
     private Set<ChatRoomEntity> chatRooms = new HashSet<>();
 
     // 사용자와 메시지는 일대다 관계
