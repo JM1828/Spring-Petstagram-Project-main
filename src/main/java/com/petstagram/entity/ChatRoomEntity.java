@@ -45,9 +45,9 @@ public class ChatRoomEntity {
                 .build();
     }
 
-    // 연관관계 편의 메서드
-    public void addUser(UserEntity user) {
-        this.users.add(user);
-        user.getChatRooms().add(this);
+    // 메시지를 채팅룸에 추가
+    public void addMessage(MessageEntity message) {
+        this.messages.add(message);
+        message.setChatRoom(this);
     }
 }

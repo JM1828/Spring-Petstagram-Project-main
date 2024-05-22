@@ -20,14 +20,16 @@ import java.util.stream.Collectors;
 public class ChatRoomDTO {
 
     private Long id;
-    private List<MessageEntity> messages;
+    private List<MessageDTO> messages;
     private Set<String> userEmails; // 사용자 이메일 목록
 
     // Entity -> DTO
     public static ChatRoomDTO toDTO(ChatRoomEntity chatRoom) {
         return ChatRoomDTO.builder()
                 .id(chatRoom.getId())
-                .messages(chatRoom.getMessages())
+                .messages(chatRoom.getMessages().stream()
+                        .map(MessageDTO::toDTO)
+                        .collect(Collectors.toList()))
                 .userEmails(chatRoom.getUsers().stream()
                         .map(UserEntity::getEmail)
                         .collect(Collectors.toSet()))

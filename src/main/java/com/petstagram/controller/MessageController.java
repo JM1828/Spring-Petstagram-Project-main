@@ -22,10 +22,9 @@ public class MessageController {
 
     // 메시지 보내기
     @PostMapping("/send")
-    public ResponseEntity<String> sendMessage(@RequestBody MessageDTO messageDTO) {
+    public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
 //        try {
-            messageService.sendMessage(messageDTO);
-         return ResponseEntity.ok("메시지가 작성되었습니다.");
+         return ResponseEntity.ok(messageService.sendMessage(messageDTO));
 //        } catch (Exception e) {
 //            log.error("파일 업로드 중 오류 발생", e);
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 작성에 실패했습니다.");
@@ -34,7 +33,7 @@ public class MessageController {
 
     // 두 사용자 간의 메시지 목록 조회
     @GetMapping("/between/{receiverEmail}")
-    public ResponseEntity<List<MessageDTO>> getMessageBetweenUsers(@PathVariable String receiverEmail) {
+    public ResponseEntity<List<MessageDTO>> getChatRoomByUserId(@PathVariable String receiverEmail) {
         List<MessageDTO> messages = messageService.getMessageBetweenUsers(receiverEmail);
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }

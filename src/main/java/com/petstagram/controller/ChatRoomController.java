@@ -20,9 +20,10 @@ public class ChatRoomController {
         return ResponseEntity.ok(newChatRoom);
     }
 
+    // 채팅방 및 메시지 목록 조회
     @PostMapping("/chatRooms/join/{roomId}")
-    public ResponseEntity<ChatRoomEntity> addUserToChatRoom(@PathVariable Long roomId) {
-        ChatRoomEntity updatedChatRoom = chatRoomService.addUserToChatRoom(roomId);
+    public ResponseEntity<ChatRoomDTO > addUserToChatRoom(@PathVariable Long roomId) {
+        ChatRoomDTO updatedChatRoom = chatRoomService.addUserToChatRoom(roomId);
         return ResponseEntity.ok(updatedChatRoom);
     }
 }

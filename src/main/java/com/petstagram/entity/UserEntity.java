@@ -81,6 +81,13 @@ public class UserEntity implements UserDetails {
         message.setReceiver(this);
     }
 
+    // 채팅방 참여 관련 메서드
+    public void joinChatRoom(ChatRoomEntity chatRoom) {
+        this.chatRooms.add(chatRoom);
+        chatRoom.getUsers().add(this);
+    }
+
+
     // DTO -> Entity
     public static UserEntity toEntity(UserDTO userDTO, BCryptPasswordEncoder bCryptPasswordEncoder) {
         UserEntity userEntity = UserEntity.builder()

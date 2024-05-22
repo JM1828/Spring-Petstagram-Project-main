@@ -18,7 +18,7 @@ public class MessageDTO {
     private String messageType; // 메시지 유형
     private String senderEmail; // 메세지를 작성한 사용자 이메일
     private String receiverEmail; // 메세지를 작성한 사용자 이메일
-    private ChatRoomEntity chatRoomId;
+    private Long chatRoomId; // 채팅방 ID 추가
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {

@@ -42,10 +42,11 @@ public class MessageEntity extends BaseEntity{
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageList = new ArrayList<>();
 
+    // DTO - Entity
     public static MessageEntity toEntity(MessageDTO messageDTO) {
         return MessageEntity.builder()
                 .messageContent(messageDTO.getMessageContent())
-                .imageList(new ArrayList<>())
+//                .imageList(new ArrayList<>())
                 .build();
     }
 }
