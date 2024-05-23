@@ -10,6 +10,8 @@ import com.petstagram.repository.MessageRepository;
 import com.petstagram.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,9 +65,14 @@ public class MessageService {
 //        handleFileUpload(file, messageEntity);
 
         // 메시지 저장
-        MessageEntity save = messageRepository.save(messageEntity);
+        messageRepository.save(messageEntity);
 
-        return MessageDTO.toDTO(save);
+        // 최신 메시지 조회
+        Pageable pageable = PageRequest.of(0, 1);
+        List<MessageEntity> latestMessages = messageRepository.findLatestMessageByChatRoomId(messageDTO.getChatRoomId(), pageable);
+        MessageEntity latestMessage = latestMessages.isEmpty() ? null : latestMessages.get(0);
+
+        return MessageDTO.toDTO(latestMessage);
     }
 
     // 두 사용자 간의 메시지 목록 조회

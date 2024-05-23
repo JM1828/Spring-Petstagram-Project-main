@@ -1,6 +1,7 @@
 package com.petstagram.repository;
 
 import com.petstagram.entity.MessageEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,5 +15,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     List<MessageEntity> findMessagesBetweenUsers(@Param("senderEmail") String senderEmail, @Param("receiverEmail") String receiverEmail);
 
     List<MessageEntity> findByChatRoomId(Long roomId);
+
+    @Query("SELECT m FROM MessageEntity m WHERE m.chatRoom.id = :chatRoomId ORDER BY m.regTime DESC")
+    List<MessageEntity> findLatestMessageByChatRoomId(@Param("chatRoomId") Long chatRoomId, Pageable pageable);
 }
 
