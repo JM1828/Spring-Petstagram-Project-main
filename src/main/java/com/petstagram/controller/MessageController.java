@@ -24,7 +24,7 @@ public class MessageController {
     @PostMapping("/send")
     public ResponseEntity<MessageDTO> sendMessage(@RequestBody MessageDTO messageDTO) {
 //        try {
-         return ResponseEntity.ok(messageService.sendMessage(messageDTO));
+        return ResponseEntity.ok(messageService.sendMessage(messageDTO));
 //        } catch (Exception e) {
 //            log.error("파일 업로드 중 오류 발생", e);
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("메시지 작성에 실패했습니다.");

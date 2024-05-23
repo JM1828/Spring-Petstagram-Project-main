@@ -30,6 +30,7 @@ public class MessageDTO {
     public static MessageDTO toDTO(MessageEntity messageEntity) {
         return MessageDTO.builder()
                 .id(messageEntity.getId())
+                .chatRoomId(messageEntity.getChatRoom().getId())
                 .messageContent(messageEntity.getMessageContent())
                 .senderEmail(messageEntity.getSender().getEmail())
                 .receiverEmail(messageEntity.getReceiver().getEmail())

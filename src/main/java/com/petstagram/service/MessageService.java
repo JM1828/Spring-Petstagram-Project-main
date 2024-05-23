@@ -43,15 +43,21 @@ public class MessageService {
         UserEntity receiver = userRepository.findByEmail(messageDTO.getReceiverEmail())
                 .orElseThrow(() -> new IllegalArgumentException("수신자가 존재하지 않습니다."));
 
+        // 채팅방 찾기
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(messageDTO.getChatRoomId())
+                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
+
 
         // DTO 를 Entity 로 변환하고 사용자 정보 설정
         MessageEntity messageEntity = MessageEntity.toEntity(messageDTO);
         messageEntity.setSender(sender);
         messageEntity.setReceiver(receiver);
+        messageEntity.setChatRoom(chatRoom);
 
         // 메시지 보내기와 받기 관련 연관 관계 설정
         sender.addSentMessage(messageEntity);
         receiver.addReceivedMessage(messageEntity);
+        chatRoom.addMessage(messageEntity);
 
         // 이미지 업로드 처리
 //        handleFileUpload(file, messageEntity);
