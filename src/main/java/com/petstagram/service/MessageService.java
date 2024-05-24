@@ -65,29 +65,32 @@ public class MessageService {
 //        handleFileUpload(file, messageEntity);
 
         // 메시지 저장
-        messageRepository.save(messageEntity);
+        MessageEntity save = messageRepository.save(messageEntity);
 
-        // 최신 메시지 조회
-        Pageable pageable = PageRequest.of(0, 1);
-        List<MessageEntity> latestMessages = messageRepository.findLatestMessageByChatRoomId(messageDTO.getChatRoomId(), pageable);
-        MessageEntity latestMessage = latestMessages.isEmpty() ? null : latestMessages.get(0);
-
-        return MessageDTO.toDTO(latestMessage);
+        return MessageDTO.toDTO(save);
     }
 
     // 두 사용자 간의 메시지 목록 조회
     @Transactional(readOnly = true)
-    public List<MessageDTO> getMessageBetweenUsers(String receiverEmail) {
-        // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
-        String senderEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    public List<MessageDTO> getAllMessagesByChatRoomId(Long chatRoomId) {
 
-        // 메시지 목록 조회
-        List<MessageEntity> messages = messageRepository.findMessagesBetweenUsers(senderEmail, receiverEmail);
+        // 채팅방에 속한 모든 메시지 목록 조회
+        List<MessageEntity> messages = messageRepository.findByChatRoomId(chatRoomId);
 
-        // Entity -> DTO 변환
-        return messages.stream()
-                .map(MessageDTO::toDTO)
+        // 메시지 정보 설정
+        List<MessageDTO> messageDto = messages.stream()
+                .map(message -> {
+                    MessageDTO messageDTO = MessageDTO.toDTO(message);
+                    // 사용자 정보 설정
+                    messageDTO.setSenderEmail(message.getSender().getEmail());
+                    messageDTO.setReceiverEmail(message.getReceiver().getEmail());
+                    // 시간 설정
+                    messageDTO.setRegTime(message.getRegTime());
+                    return messageDTO;
+                })
                 .collect(Collectors.toList());
+
+        return messageDto;
     }
 
     // 이미지 업로드 처리 메서드
@@ -100,5 +103,7 @@ public class MessageService {
             messageEntity.getImageList().add(imageEntity);
         }
     }
+
+
 }
 

@@ -23,6 +23,7 @@ public class ChatRoomDTO {
     private List<MessageDTO> messages;
     private Set<String> userEmails; // 사용자 이메일 목록
 
+
     // Entity -> DTO
     public static ChatRoomDTO toDTO(ChatRoomEntity chatRoom) {
         return ChatRoomDTO.builder()

@@ -32,9 +32,9 @@ public class MessageController {
     }
 
     // 두 사용자 간의 메시지 목록 조회
-    @GetMapping("/between/{receiverEmail}")
-    public ResponseEntity<List<MessageDTO>> getChatRoomByUserId(@PathVariable String receiverEmail) {
-        List<MessageDTO> messages = messageService.getMessageBetweenUsers(receiverEmail);
+    @GetMapping("/latest/{chatRoomId}")
+    public ResponseEntity<List<MessageDTO>> getAllMessagesByChatRoomId(@PathVariable Long chatRoomId) {
+        List<MessageDTO> messages  = messageService.getAllMessagesByChatRoomId(chatRoomId);
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 }

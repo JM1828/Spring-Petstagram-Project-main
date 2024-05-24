@@ -1,6 +1,7 @@
 package com.petstagram.service;
 
 import com.petstagram.dto.ChatRoomDTO;
+import com.petstagram.dto.MessageDTO;
 import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.MessageEntity;
 import com.petstagram.entity.UserEntity;
@@ -54,7 +55,7 @@ public class ChatRoomService {
 
     // 채팅방 및 메시지 목록 조회
     @Transactional
-    public ChatRoomDTO addUserToChatRoom(Long roomId) {
+    public ChatRoomDTO getLatestMessagesByChatRoomId(Long chatRoomId) {
 
         // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
         String senderEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -64,16 +65,32 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 채팅방 찾기
-        ChatRoomEntity chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
         // 채팅방에 속한 메시지 목록 조회
-        List<MessageEntity> messages = messageRepository.findByChatRoomId(roomId);
+        List<MessageEntity> messages = messageRepository.findByChatRoomId(chatRoomId);
 
         // 채팅방 엔티티에 메시지 목록 설정
         chatRoom.addMessages(messages);
 
         // ChatRoomDTO 변환 (메시지 목록 포함)
-        return ChatRoomDTO.toDTO(chatRoom);
+        ChatRoomDTO chatRoomDTO  = ChatRoomDTO.toDTO(chatRoom);
+
+        // 메시지 정보 설정
+        List<MessageDTO> messageDTOs = messages.stream()
+                .map(message -> {
+                    MessageDTO messageDTO = MessageDTO.toDTO(message);
+                    // 사용자 정보 설정
+                    messageDTO.setSenderEmail(message.getSender().getEmail());
+                    messageDTO.setReceiverEmail(message.getReceiver().getEmail());
+                    // 시간 설정
+                    messageDTO.setRegTime(message.getRegTime());
+                    return messageDTO;
+                })
+                .collect(Collectors.toList());
+        chatRoomDTO.setMessages(messageDTOs);
+
+        return chatRoomDTO;
     }
 }
