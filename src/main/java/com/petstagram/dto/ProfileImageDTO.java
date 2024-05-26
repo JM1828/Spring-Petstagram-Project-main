@@ -1,11 +1,13 @@
 package com.petstagram.dto;
 
 import com.petstagram.entity.ProfileImageEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class ProfileImageDTO {
     private Long id;
     private String imageUrl;

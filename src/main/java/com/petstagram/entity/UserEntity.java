@@ -48,7 +48,7 @@ public class UserEntity implements UserDetails {
 
     // 채팅방과 사용자는 다대다 관계
     @ManyToMany(mappedBy = "users")
-    private Set<ChatRoomEntity> chatRooms = new HashSet<>();
+    private List<ChatRoomEntity> chatRooms = new ArrayList<>();
 
     // 사용자와 메시지는 일대다 관계
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -81,11 +81,11 @@ public class UserEntity implements UserDetails {
         message.setReceiver(this);
     }
 
-    // 채팅방 참여 관련 메서드
-    public void joinChatRoom(ChatRoomEntity chatRoom) {
-        this.chatRooms.add(chatRoom);
-        chatRoom.getUsers().add(this);
-    }
+//    // 채팅방 참여 관련 메서드
+//    public void joinChatRoom(ChatRoomEntity chatRoom) {
+//        this.chatRooms.add(chatRoom);
+//        chatRoom.getUsers().add(this);
+//    }
 
 
     // DTO -> Entity

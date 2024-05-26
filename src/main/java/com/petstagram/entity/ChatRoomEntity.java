@@ -34,10 +34,10 @@ public class ChatRoomEntity {
             joinColumns = @JoinColumn(name = "chatRoom_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<UserEntity> users = new HashSet<>();
+    private List<UserEntity> users = new ArrayList<>();
 
     // DTO -> Entity 변환 메서드
-    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, Set<UserEntity> userEntities) {
+    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, List<UserEntity> userEntities) {
         return ChatRoomEntity.builder()
                 .id(chatRoomDTO.getId())
                 .messages(new ArrayList<>())
