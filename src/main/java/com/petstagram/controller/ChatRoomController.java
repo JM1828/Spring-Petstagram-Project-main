@@ -27,12 +27,12 @@ public class ChatRoomController {
         return ResponseEntity.ok(newChatRoom);
     }
 
-    // 채팅방이 이미 존재하는지 확인
-    @GetMapping("/chatRooms/exists")
-    public ResponseEntity<Boolean> checkChatRoomExists(@RequestParam Long userId1, @RequestParam Long userId2) {
-        boolean exists = chatRoomService.checkChatRoomExists(userId1, userId2);
-        return ResponseEntity.ok(exists);
-    }
+//    // 채팅방이 이미 존재하는지 확인
+//    @GetMapping("/chatRooms/exists")
+//    public ResponseEntity<Boolean> checkChatRoomExists(@RequestParam Long userId1, @RequestParam Long userId2) {
+//        boolean exists = chatRoomService.checkChatRoomExists(userId1, userId2);
+//        return ResponseEntity.ok(exists);
+//    }
 
     // 채팅방 및 메시지 목록 조회
     @GetMapping("/chatRooms/{chatRoomId}")

@@ -27,21 +27,22 @@ public class ChatRoomEntity {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages = new ArrayList<>();
 
-    // 채팅룸과 사용자는 다대다 관계
-    @ManyToMany
-    @JoinTable(
-            name = "user_chatroom", // 이름 일치시키기
-            joinColumns = @JoinColumn(name = "chatRoom_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private List<UserEntity> users = new ArrayList<>();
+    // 채팅룸과 사용자는 다대일 관계
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private UserEntity sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id")
+    private UserEntity receiver;
 
     // DTO -> Entity 변환 메서드
-    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, List<UserEntity> userEntities) {
+    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, UserEntity sender, UserEntity receiver) {
         return ChatRoomEntity.builder()
                 .id(chatRoomDTO.getId())
+                .sender(sender)
+                .receiver(receiver)
                 .messages(new ArrayList<>())
-                .users(userEntities)
                 .build();
     }
 

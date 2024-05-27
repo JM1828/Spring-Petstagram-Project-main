@@ -31,24 +31,19 @@ public class ChatRoomService {
     @Transactional
     public ChatRoomDTO createChatRoom(ChatRoomDTO chatRoomDTO) {
 
-        List<UserEntity> userEntities = chatRoomDTO.getUserIds().stream()
-                .map(email -> userRepository.findById(email)
-                        .orElseThrow(() -> new RuntimeException("User not found: " + email)))
-                .collect(Collectors.toList());
+        // sender 와 receiver 를 각각 조회
+        UserEntity sender = userRepository.findById(chatRoomDTO.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Sender not found: " + chatRoomDTO.getSenderId()));
+        UserEntity receiver = userRepository.findById(chatRoomDTO.getReceiverId())
+                .orElseThrow(() -> new RuntimeException("Receiver not found: " + chatRoomDTO.getReceiverId()));
 
         // 채팅방 엔티티 생성
-        ChatRoomEntity chatRoom = ChatRoomEntity.toEntity(chatRoomDTO, userEntities);
+        ChatRoomEntity chatRoom = ChatRoomEntity.toEntity(chatRoomDTO, sender, receiver);
 
         // 채팅방 저장
         ChatRoomEntity savedChatRoom = chatRoomRepository.save(chatRoom);
 
         return ChatRoomDTO.toDTO(savedChatRoom);
-    }
-
-    // 채팅방 존재 여부 확인
-    public boolean checkChatRoomExists(Long userId1, Long userId2) {
-        Optional<ChatRoomEntity> chatRoom = chatRoomRepository.findChatRoomByUserIds(userId1, userId2);
-        return chatRoom.isPresent();
     }
 
     // 채팅방 ID에 해당하는 채팅방과 메시지들을 가져오는 메서드
@@ -84,11 +79,13 @@ public class ChatRoomService {
         // 현재 사용자를 가져옴
         Optional<UserEntity> currentUserOptional = userRepository.findByEmail(currentUserEmail);
 
+        UserEntity currentUser = currentUserOptional.get();
+
         // 사용자가 보낸 메시지가 포함된 채팅방 목록을 가져옴
-        List<ChatRoomEntity> sentChatRooms = chatRoomRepository.findDistinctByMessages_Sender(currentUserOptional);
+        List<ChatRoomEntity> sentChatRooms = chatRoomRepository.findDistinctByMessages_Sender(currentUser);
 
         // 사용자가 받은 메시지가 포함된 채팅방 목록을 가져옴
-        List<ChatRoomEntity> receivedChatRooms = chatRoomRepository.findDistinctByMessages_Receiver(currentUserOptional);
+        List<ChatRoomEntity> receivedChatRooms = chatRoomRepository.findDistinctByMessages_Receiver(currentUser);
 
         // 두 목록을 합침
         Set<ChatRoomEntity> allChatRooms = new HashSet<>();
@@ -105,20 +102,12 @@ public class ChatRoomService {
                     ChatRoomDTO.ChatRoomDTOBuilder builder = ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
                             .messages(recentMessages.stream().map(MessageDTO::toDTO).collect(Collectors.toList()))
-                            .userIds(chatRoomEntity.getUsers().stream().map(UserEntity::getId).collect(Collectors.toList()))
-                            .userEmails(chatRoomEntity.getUsers().stream().map(UserEntity::getEmail).collect(Collectors.toList()))
-                            .userNames(chatRoomEntity.getUsers().stream().map(UserEntity::getName).collect(Collectors.toList()))
-                            .users(chatRoomEntity.getUsers().stream().map(user -> {
-                                UserDTO userDTO = UserDTO.toDTO(user);
-                                ProfileImageDTO profileImageDTO = null;
-                                if (user.getProfileImage() != null) {
-                                    profileImageDTO = ProfileImageDTO.builder()
-                                            .imageUrl(user.getProfileImage().getImageUrl())
-                                            .build();
-                                }
-                                userDTO.setProfileImage(profileImageDTO);
-                                return userDTO;
-                            }).collect(Collectors.toList()));
+                            .senderId(chatRoomEntity.getSender().getId())
+                            .senderEmail(chatRoomEntity.getSender().getEmail())
+                            .senderName(chatRoomEntity.getSender().getName())
+                            .receiverId(chatRoomEntity.getReceiver().getId())
+                            .receiverEmail(chatRoomEntity.getReceiver().getEmail())
+                            .receiverName(chatRoomEntity.getReceiver().getName());
 
                     return builder.build();
                 })
@@ -131,12 +120,17 @@ public class ChatRoomService {
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
-        // ChatRoomDTO 변환
-        ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
-
-        // 사용자 정보 설정
-        List<UserEntity> users = chatRoom.getUsers();
-        chatRoomDTO.setUsers(users.stream().map(UserDTO::toDTO).collect(Collectors.toList()));
+        // ChatRoomDTO 변환. toDTO 메소드 수정이 필요합니다.
+        ChatRoomDTO chatRoomDTO = ChatRoomDTO.builder()
+                .id(chatRoom.getId())
+                .messages(chatRoom.getMessages().stream().map(MessageDTO::toDTO).collect(Collectors.toList()))
+                .senderId(chatRoom.getSender().getId()) // 채팅방 메시지 송신자 정보
+                .senderEmail(chatRoom.getSender().getEmail())
+                .senderName(chatRoom.getSender().getName())
+                .receiverId(chatRoom.getReceiver().getId()) // 채팅방 메시지 수신자 정보
+                .receiverEmail(chatRoom.getReceiver().getEmail())
+                .receiverName(chatRoom.getReceiver().getName())
+                .build();
 
         return chatRoomDTO;
     }

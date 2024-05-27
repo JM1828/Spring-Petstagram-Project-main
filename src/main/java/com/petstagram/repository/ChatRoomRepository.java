@@ -16,14 +16,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
     @Query("SELECT message FROM MessageEntity message WHERE message.chatRoom.id = :chatRoomId ORDER BY message.regTime DESC")
     List<MessageEntity> findRecentMessagesByChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
-    @Query("SELECT cr FROM ChatRoomEntity cr JOIN cr.users u1 JOIN cr.users u2 " +
-            "WHERE u1.id = :userId1 AND u2.id = :userId2")
-    Optional<ChatRoomEntity> findChatRoomByUserIds(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
+    List<ChatRoomEntity> findDistinctByMessages_Sender(UserEntity sender);
 
-    List<ChatRoomEntity> findAllByUsersContains(Optional<UserEntity> currentUser);
-
-    List<ChatRoomEntity> findDistinctByMessages_Sender(Optional<UserEntity> sender);
-
-    List<ChatRoomEntity> findDistinctByMessages_Receiver(Optional<UserEntity> receiver);
+    List<ChatRoomEntity> findDistinctByMessages_Receiver(UserEntity receiver);
 
 }
