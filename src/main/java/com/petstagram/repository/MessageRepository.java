@@ -17,12 +17,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     List<MessageEntity> findBySenderIdOrReceiverId(Long SenderId, Long ReceiverId);
 
-    List<MessageEntity> findByChatRoomId(Long chatRoomId);
+    List<MessageEntity> findRecentMessagesByChatRoomId(Long id);
 
-    // 특정 채팅방의 모든 메시지를 가져옴
-//    List<MessageEntity> findByChatRoomId(Long roomId);
-
-//    @Query("SELECT m FROM MessageEntity m WHERE m.chatRoom.id = :chatRoomId ORDER BY m.regTime DESC")
-//    List<MessageEntity> findLatestMessageByChatRoomId(@Param("chatRoomId") Long chatRoomId, Pageable pageable);
+    List<MessageEntity> findAllByChatRoomId(Long chatRoomId);
 }
 

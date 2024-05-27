@@ -7,6 +7,8 @@ import com.petstagram.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +44,12 @@ public class ChatRoomController {
     // 모든 채팅방 리스트 조회
     @GetMapping("/chatRooms/list")
     public ResponseEntity<List<ChatRoomDTO>> getChatRoomList() {
-        List<ChatRoomDTO> chatRoomList = chatRoomService.getChatRoomList();
+        // 현재 로그인한 사용자의 정보를 가져옴
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        // 현재 사용자의 채팅방 목록 가져옴
+        List<ChatRoomDTO> chatRoomList = chatRoomService.getChatRoomList(currentUserEmail);
         return ResponseEntity.ok(chatRoomList);
     }
 

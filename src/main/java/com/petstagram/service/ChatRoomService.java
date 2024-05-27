@@ -15,9 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +25,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final MessageRepository messageRepository;
 
     // 채팅방 생성
     @Transactional
@@ -65,8 +64,8 @@ public class ChatRoomService {
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
-        // 채팅방에 속한 최근 메시지 목록 조회
-        List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
+        // 채팅방에 속한 모든 메시지 목록 조회
+        List<MessageEntity> messages = messageRepository.findAllByChatRoomId(chatRoomId);
 
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
@@ -80,16 +79,27 @@ public class ChatRoomService {
         return chatRoomDTO;
     }
 
-    // 모든 채팅방 리스트 조회
-    public List<ChatRoomDTO> getChatRoomList() {
-        // 모든 채팅방 목록 가져옴
-        List<ChatRoomEntity> chatRooms = chatRoomRepository.findAll();
+    // 채팅방 리스트 조회
+    public List<ChatRoomDTO> getChatRoomList(String currentUserEmail) {
+        // 현재 사용자를 가져옴
+        Optional<UserEntity> currentUserOptional = userRepository.findByEmail(currentUserEmail);
+
+        // 사용자가 보낸 메시지가 포함된 채팅방 목록을 가져옴
+        List<ChatRoomEntity> sentChatRooms = chatRoomRepository.findDistinctByMessages_Sender(currentUserOptional);
+
+        // 사용자가 받은 메시지가 포함된 채팅방 목록을 가져옴
+        List<ChatRoomEntity> receivedChatRooms = chatRoomRepository.findDistinctByMessages_Receiver(currentUserOptional);
+
+        // 두 목록을 합침
+        Set<ChatRoomEntity> allChatRooms = new HashSet<>();
+        allChatRooms.addAll(sentChatRooms);
+        allChatRooms.addAll(receivedChatRooms);
 
         // ChatRoomEntity 를 ChatRoomDTO 로 변환하여 반환
-        return chatRooms.stream()
+        return allChatRooms.stream()
                 .map(chatRoomEntity -> {
                     // 채팅방의 최근 메시지를 가져옴
-                    List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
+                    List<MessageEntity> recentMessages = messageRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
                     // ChatRoomDTO 생성
                     ChatRoomDTO.ChatRoomDTOBuilder builder = ChatRoomDTO.builder()
