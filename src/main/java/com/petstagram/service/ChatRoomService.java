@@ -28,17 +28,19 @@ public class ChatRoomService {
     // 채팅방 생성
     @Transactional
     public ChatRoomDTO createChatRoom(ChatRoomDTO chatRoomDTO) {
-
         // sender 와 receiver 를 각각 조회
         UserEntity sender = userRepository.findById(chatRoomDTO.getSenderId())
                 .orElseThrow(() -> new RuntimeException("Sender not found: " + chatRoomDTO.getSenderId()));
         UserEntity receiver = userRepository.findById(chatRoomDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Receiver not found: " + chatRoomDTO.getId()));
 
-        // 채팅방 엔티티 생성
-        ChatRoomEntity chatRoom = ChatRoomEntity.toEntity(chatRoomDTO, sender, receiver);
+        // DTO -> Entity
+        ChatRoomEntity chatRoom = new ChatRoomEntity();
+        chatRoom.setMessages(new ArrayList<>());
+        chatRoom.setReceiver(sender);
+        chatRoom.setReceiver(receiver);
 
-        // 연관관계 설정
+        // 연관관계 메서드
         sender.addSentChatRoom(chatRoom);
         receiver.addReceivedChatRoom(chatRoom);
 
@@ -127,9 +129,6 @@ public class ChatRoomService {
                 })
                 .collect(Collectors.toList());
 
-        // 현재 사용자가 송신자인 경우와 수신자인 경우에 따라 적절한 목록 반환
-        // 이 부분은 비즈니스 로직에 따라 조정될 수 있습니다.
-        // 예: 모든 채팅방을 보여주거나, 특정 조건에 따라 필터링하여 반환할 수 있습니다.
         List<ChatRoomDTO> result = new ArrayList<>();
         result.addAll(sentChatRoomDTOs);
         result.addAll(receivedChatRoomDTOs);

@@ -36,16 +36,6 @@ public class ChatRoomEntity {
     @JoinColumn(name = "receiver_id")
     private UserEntity receiver;
 
-    // DTO -> Entity 변환 메서드
-    public static ChatRoomEntity toEntity(ChatRoomDTO chatRoomDTO, UserEntity sender, UserEntity receiver) {
-        return ChatRoomEntity.builder()
-                .id(chatRoomDTO.getId())
-                .sender(sender)
-                .receiver(receiver)
-                .messages(new ArrayList<>())
-                .build();
-    }
-
     // 메시지를 추가하는 메서드
     public void addMessage(MessageEntity message) {
         this.messages.add(message);
