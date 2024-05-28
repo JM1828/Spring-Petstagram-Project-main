@@ -1,3 +1,4 @@
+
 package com.petstagram.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,13 +43,6 @@ public class CommentEntity extends BaseEntity {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<CommentLikeEntity> commentLikeList = new HashSet<>();
-
-    // DTO -> Entity
-    public static CommentEntity toEntity(CommentDTO dto) {
-        return CommentEntity.builder()
-                .commentContent(dto.getCommentContent())
-                .build();
-    }
 
     // == 연관관계 편의 메서드 == //
     // 댓글 좋아요를 추가하는 메서드

@@ -11,7 +11,6 @@ public class ImageDTO {
     private String imageUrl;
     private Long postId;
 
-    // 민
     public static ImageDTO toDTO(ImageEntity imageEntity) {
         ImageDTO imageDTO = new ImageDTO();
         imageDTO.setId(imageEntity.getId());

@@ -21,10 +21,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findByName(String username);
 
     @Query("SELECT new com.petstagram.dto.UserProfileDTO(u.id, u.name, u.email, " +
-            "new com.petstagram.dto.ProfileImageDTO(p.id, p.imageUrl, u.id)) " +
+            "new com.petstagram.dto.ProfileImageDTO(p.id, p.imageUrl, u.id), " +
+            "u.bio, u.isRecommend) " +
             "FROM UserEntity u " +
             "LEFT JOIN u.profileImage p")
     List<UserProfileDTO> findAllUserProfiles();
+
 
 
     @Query("SELECT new com.petstagram.dto.ProfileImageDTO(pi.id, pi.imageUrl, u.id) " +

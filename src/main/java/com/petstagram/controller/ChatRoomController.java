@@ -2,10 +2,8 @@ package com.petstagram.controller;
 
 import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.entity.ChatRoomEntity;
-import com.petstagram.entity.MessageEntity;
 import com.petstagram.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,8 +35,8 @@ public class ChatRoomController {
     // 채팅방 및 메시지 목록 조회
     @GetMapping("/chatRooms/{chatRoomId}")
     public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId) {
-            ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesById(chatRoomId);
-            return ResponseEntity.ok(chatRoomDTO);
+        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesById(chatRoomId);
+        return ResponseEntity.ok(chatRoomDTO);
     }
 
     // 모든 채팅방 리스트 조회

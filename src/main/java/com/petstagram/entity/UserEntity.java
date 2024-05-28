@@ -1,3 +1,4 @@
+
 package com.petstagram.entity;
 
 import com.petstagram.dto.ProfileImageDTO;
@@ -46,7 +47,7 @@ public class UserEntity implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private ProfileImageEntity profileImage;
 
-    // 채팅방과 사용자는 다대다 관계
+    // 채팅방과 사용자는 일대다 관계
     @OneToMany(mappedBy = "sender")
     private List<ChatRoomEntity> sentChatRooms;
 
@@ -72,6 +73,22 @@ public class UserEntity implements UserDetails {
         comment.setUser(this);
     }
 
+    // 채팅방 관련 메서드
+    public void addSentChatRoom(ChatRoomEntity chatRoom) {
+        this.sentChatRooms.add(chatRoom);
+        if (chatRoom.getSender() != this) {
+            chatRoom.setSender(this);
+        }
+    }
+
+    // 채팅방 관력 메서드
+    public void addReceivedChatRoom(ChatRoomEntity chatRoom) {
+        this.receivedChatRooms.add(chatRoom);
+        if (chatRoom.getReceiver() != this) {
+            chatRoom.setReceiver(this);
+        }
+    }
+
     // 메시지 보내기 관련 메서드
     public void addSentMessage(MessageEntity message) {
         sentMessages.add(message);
@@ -83,13 +100,6 @@ public class UserEntity implements UserDetails {
         receivedMessages.add(message);
         message.setReceiver(this);
     }
-
-//    // 채팅방 참여 관련 메서드
-//    public void joinChatRoom(ChatRoomEntity chatRoom) {
-//        this.chatRooms.add(chatRoom);
-//        chatRoom.getUsers().add(this);
-//    }
-
 
     // DTO -> Entity
     public static UserEntity toEntity(UserDTO userDTO, BCryptPasswordEncoder bCryptPasswordEncoder) {

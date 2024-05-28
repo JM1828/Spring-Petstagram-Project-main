@@ -70,6 +70,7 @@ public class PostEntity extends BaseEntity {
 //        hashtag.getPosts().add(this);
 //    }
 //
+
     // 댓글을 포스트에 추가하는 메서드
     public void addComment(CommentEntity commentEntity) {
         this.commentList.add(commentEntity);

@@ -1,7 +1,6 @@
 package com.petstagram.repository;
 
 import com.petstagram.entity.MessageEntity;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +20,3 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     List<MessageEntity> findAllByChatRoomId(Long chatRoomId);
 }
-

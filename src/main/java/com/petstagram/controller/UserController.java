@@ -49,6 +49,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userId, userDTO));
     }
 
+    // 회원 프로필 편집
     @PutMapping(value = "/edit/{userId}", consumes = {"multipart/form-data"})
     public ResponseEntity<String> editUser(@PathVariable Long userId,
                                            @RequestPart("user") UserDTO userDTO,
@@ -93,6 +94,19 @@ public class UserController {
     @GetMapping("/get/{userId}")
     public ResponseEntity<UserDTO> getUSerByID(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUsersById(userId));
+    }
 
+    // 팔로워 갯수
+    @GetMapping("/followersCount/{userId}")
+    public ResponseEntity<Integer> getFollowersCount(@PathVariable Long userId) {
+        int count = userService.getFollowersCount(userId);
+        return ResponseEntity.ok(count);
+    }
+
+    // 팔로잉 갯수
+    @GetMapping("/followingsCount/{userId}")
+    public ResponseEntity<Integer> getFollowingsCount(@PathVariable Long userId) {
+        int count = userService.getFollowingsCount(userId);
+        return ResponseEntity.ok(count);
     }
 }

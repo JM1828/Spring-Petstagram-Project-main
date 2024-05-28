@@ -40,7 +40,8 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
 
         // DTO 를 Entity 로 변환하고 게시글 정보 설정
-        CommentEntity commentEntity = CommentEntity.toEntity(commentDTO);
+        CommentEntity commentEntity = new CommentEntity();
+        commentEntity.setCommentContent(commentDTO.getCommentContent());
         commentEntity.setPost(post); // 댓글이 속한 게시글 설정
         commentEntity.setUser(currentUser); // 댓글을 작성한 사용자 설정
 

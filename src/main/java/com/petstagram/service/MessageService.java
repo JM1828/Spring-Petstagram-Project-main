@@ -1,3 +1,4 @@
+
 package com.petstagram.service;
 
 import com.petstagram.dto.MessageDTO;
@@ -34,14 +35,15 @@ public class MessageService {
     public MessageDTO sendMessage(MessageDTO messageDTO) {
 
         // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
-        String senderEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // 보내는 사람 찾기
-        UserEntity sender = userRepository.findByEmail(senderEmail)
+        UserEntity sender = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 받는 사람 찾기
-        UserEntity receiver = userRepository.findById(messageDTO.getReceiverId())
+        UserEntity receiver;
+        receiver = userRepository.findById(messageDTO.getReceiverId())
                 .orElseThrow(() -> new IllegalArgumentException("수신자가 존재하지 않습니다."));
 
         // 채팅방 찾기
@@ -55,6 +57,9 @@ public class MessageService {
         messageEntity.setSender(sender);
         messageEntity.setReceiver(receiver);
         messageEntity.setChatRoom(chatRoom);
+
+        // 연관관계 편의 메서드 설정
+        chatRoom.addMessage(messageEntity);
 
         // 메시지 저장
         MessageEntity savedMessage = messageRepository.save(messageEntity);
@@ -73,29 +78,6 @@ public class MessageService {
         messageRepository.deleteById(messageId);
     }
 
-//    // 두 사용자 간의 메시지 목록 조회
-//    @Transactional(readOnly = true)
-//    public List<MessageDTO> getAllMessagesByChatRoomId(Long chatRoomId) {
-//
-//        // 채팅방에 속한 모든 메시지 목록 조회
-//        List<MessageEntity> messages = messageRepository.findByChatRoomId(chatRoomId);
-//
-//        // 메시지 정보 설정
-//        List<MessageDTO> messageDto = messages.stream()
-//                .map(message -> {
-//                    MessageDTO messageDTO = MessageDTO.toDTO(message);
-//                    // 사용자 정보 설정
-//                    messageDTO.setSenderEmail(message.getSender().getEmail());
-//                    messageDTO.setReceiverEmail(message.getReceiver().getEmail());
-//                    // 시간 설정
-//                    messageDTO.setRegTime(message.getRegTime());
-//                    return messageDTO;
-//                })
-//                .collect(Collectors.toList());
-//
-//        return messageDto;
-//    }
-
     // 이미지 업로드 처리 메서드
     private void handleFileUpload(MultipartFile file, MessageEntity messageEntity) {
         if (file != null && !file.isEmpty()) {
@@ -107,4 +89,3 @@ public class MessageService {
         }
     }
 }
-

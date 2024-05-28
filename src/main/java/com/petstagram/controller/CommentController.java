@@ -1,7 +1,6 @@
 package com.petstagram.controller;
 
 import com.petstagram.dto.CommentDTO;
-import com.petstagram.dto.PostDTO;
 import com.petstagram.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

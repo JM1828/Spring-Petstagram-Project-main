@@ -1,4 +1,4 @@
-//package com.petstagram.dto.oauth2Dto;
+package com.petstagram.dto.oauth2Dto;//package com.petstagram.dto.oauth2Dto;
 //
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.security.core.GrantedAuthority;

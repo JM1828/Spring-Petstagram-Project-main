@@ -1,3 +1,4 @@
+
 package com.petstagram.entity;
 
 import com.petstagram.dto.MessageDTO;
@@ -41,4 +42,12 @@ public class MessageEntity extends BaseEntity{
     // 메시지와 이미지는 일대다 관계
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageList = new ArrayList<>();
+
+    // DTO - Entity
+    public static MessageEntity toEntity(MessageDTO messageDTO) {
+        return MessageEntity.builder()
+                .messageContent(messageDTO.getMessageContent())
+//                .imageList(new ArrayList<>())
+                .build();
+    }
 }

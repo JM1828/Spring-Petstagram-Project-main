@@ -46,20 +46,11 @@ public class ChatRoomEntity {
                 .build();
     }
 
-    // 단일 메시지를 추가하는 기존 메서드 유지
+    // 메시지를 추가하는 메서드
     public void addMessage(MessageEntity message) {
-        if (this.messages == null) {
-            this.messages = new ArrayList<>();
-        }
         this.messages.add(message);
-        message.setChatRoom(this);
-    }
-
-    // 여러 메시지를 한 번에 추가하는 메서드
-    public void addMessages(List<MessageEntity> messages) {
-        if (this.messages == null) {
-            this.messages = new ArrayList<>();
+        if (message.getChatRoom() != this) {
+            message.setChatRoom(this);
         }
-        messages.forEach(this::addMessage); // Java 8의 메서드 참조 사용
     }
 }
