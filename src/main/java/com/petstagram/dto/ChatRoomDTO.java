@@ -17,29 +17,24 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ChatRoomDTO {
 
-    private Long chatRoomId;
+    private Long id;
     private List<MessageDTO> messages; // 채팅방의 모든 메시지
     private Long senderId; // 발신자 ID
-    private String senderEmail; // 발신자 이메일
     private String senderName; // 발신자 이름
-    private Long id; // 수신자 ID
-    private String email; // 수신자 이메일
-    private String name; // 수신자 이름
-    private ProfileImageDTO profileImage;
+    private Long receiverId; // 수신자 ID
+    private String receiverName; // 수신자 이름
 
     // Entity -> DTO 변환 메서드
     public static ChatRoomDTO toDTO(ChatRoomEntity chatRoom) {
         return ChatRoomDTO.builder()
-                .chatRoomId(chatRoom.getId())
+                .id(chatRoom.getId())
                 .messages(chatRoom.getMessages().stream()
                         .map(MessageDTO::toDTO)
                         .collect(Collectors.toList()))
                 .senderId(chatRoom.getSender().getId())
-                .senderEmail(chatRoom.getSender().getEmail())
                 .senderName(chatRoom.getSender().getName())
-                .id(chatRoom.getReceiver().getId())
-                .email(chatRoom.getReceiver().getEmail())
-                .name(chatRoom.getReceiver().getName())
+                .receiverId(chatRoom.getReceiver().getId())
+                .receiverName(chatRoom.getReceiver().getName())
                 .build();
     }
 }

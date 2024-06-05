@@ -84,6 +84,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 선택한 회원 마이페이지
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<UserDTO> getUserProfile(@PathVariable Long userId) {
+        UserDTO response = userService.getUserProfile(userId);
+        return ResponseEntity.ok(response);
+    }
+
     // 회원 모두 조회
     @GetMapping("/getAllUsers")
     public List<UserProfileDTO> getAllUserProfiles() {

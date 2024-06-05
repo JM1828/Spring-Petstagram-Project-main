@@ -27,6 +27,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final FileUploadService fileUploadService;
+    private final NotificationService notificationService;
 
     // 게시글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
@@ -159,20 +160,25 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 좋아요가 이미 있는지 확인
-        Optional<PostLikeEntity> postLikeOpt  = postLikeRepository.findByPostAndUser(post, user);
+        Optional<PostLikeEntity> postLikeOpt = postLikeRepository.findByPostAndUser(post, user);
 
+        boolean isLiked;
         if (postLikeOpt.isPresent()) {
-            // 좋아요 엔티티가 존재한다면, 상태를 false로 설정하고 타임스탬프 업데이트
-            PostLikeEntity postLikeEntity = postLikeOpt.get();
-            postLikeEntity.setPostStatus(!postLikeEntity.isPostStatus());
-            postLikeRepository.delete(postLikeEntity);
+            // 좋아요 엔티티가 존재한다면 삭제
+            postLikeRepository.delete(postLikeOpt.get());
+            isLiked = false;
         } else {
             // 좋아요가 없다면 추가
             PostLikeEntity postLikeEntity = new PostLikeEntity();
             postLikeEntity.setPost(post);
             postLikeEntity.setUser(user);
-            postLikeEntity.setPostStatus(true);
             postLikeRepository.save(postLikeEntity);
+            isLiked = true;
+        }
+
+        if (isLiked) {
+            // 좋아요를 눌렀을 때만 알림 생성 및 전송
+            notificationService.sendNotification(post.getUser().getId(), "like", user.getId(), post.getId(), null);
         }
     }
 

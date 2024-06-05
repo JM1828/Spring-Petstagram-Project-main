@@ -10,12 +10,18 @@ public class ImageDTO {
     private Long id;
     private String imageUrl;
     private Long postId;
+    private Long messageId;
 
     public static ImageDTO toDTO(ImageEntity imageEntity) {
         ImageDTO imageDTO = new ImageDTO();
         imageDTO.setId(imageEntity.getId());
         imageDTO.setImageUrl(imageEntity.getImageUrl());
-        imageDTO.setPostId(imageEntity.getPost().getId());
+        if (imageEntity.getPost() != null) {
+            imageDTO.setPostId(imageEntity.getPost().getId());
+        }
+        if (imageEntity.getMessage() != null) {
+            imageDTO.setMessageId(imageEntity.getMessage().getId());
+        }
         return imageDTO;
     }
 }

@@ -26,8 +26,10 @@ public class PostEntity extends BaseEntity {
 
     private String postContent; // 게시물 내용(텍스트, 이미지, 비디오 링크 등).
 
+    private String breed; // 강아지 종류 텐서플로우로 분류
+
     // 게시물과 사용자는 다대일 관계
-    @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY 는 지연 로딩을 의미
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private UserEntity user; // 게시물 작성자의 식별자.
@@ -49,27 +51,11 @@ public class PostEntity extends BaseEntity {
     public static PostEntity toEntity(PostDTO dto) {
         return PostEntity.builder()
                 .postContent(dto.getPostContent())
+                .breed(dto.getBreed())
                 .imageList(new ArrayList<>())
                 .commentList(new ArrayList<>())
                 .build();
     }
-
-    //    // 게시물과 해시태그는 다대다 관계
-//    @ManyToMany
-//    @JoinTable(
-//            name = "post_hashtags",
-//            joinColumns = @JoinColumn(name = "post_id"),
-//            inverseJoinColumns = @JoinColumn(name = "hashtag_id")
-//    )
-//    private Set<Hashtag> hashtags = new HashSet<>();
-//
-//    // == 연관관계 편의 메서드 == //
-//    // 해시태그를 포스트에 추가하는 메서드
-//    public void addHashtag(Hashtag hashtag) {
-//        this.hashtags.add(hashtag);
-//        hashtag.getPosts().add(this);
-//    }
-//
 
     // 댓글을 포스트에 추가하는 메서드
     public void addComment(CommentEntity commentEntity) {
@@ -81,5 +67,10 @@ public class PostEntity extends BaseEntity {
     public void addLike(PostLikeEntity postLikeEntity) {
         this.postLikeList.add(postLikeEntity);
         postLikeEntity.setPost(this);
+    }
+
+    // 작성자 아이디를 가져오는 메서드
+    public Long getAuthorId() {
+        return this.user != null ? this.user.getId() : null;
     }
 }

@@ -1,6 +1,7 @@
 package com.petstagram.dto;
 
 import com.petstagram.entity.CommentEntity;
+import com.petstagram.entity.PostEntity;
 import lombok.*;
 
 @Getter
@@ -16,12 +17,15 @@ public class CommentDTO {
     private boolean commentLiked; // 댓글 좋아요 상태
     private long commentLikesCount; // 댓글의 좋아요 수.
 
+    private Long postId;
+
     // Entity -> DTO
     public static CommentDTO toDTO(CommentEntity commentEntity) {
         return CommentDTO.builder()
                 .id(commentEntity.getId())
                 .commentContent(commentEntity.getCommentContent())
                 .commentEmail(commentEntity.getUser().getEmail())
+                .postId(commentEntity.getPost().getId())
                 .build();
     }
 }

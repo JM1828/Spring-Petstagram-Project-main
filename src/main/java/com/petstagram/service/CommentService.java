@@ -25,36 +25,34 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // 댓글 작성
     public Long writeComment(Long postId, CommentDTO commentDTO) {
-        // 게시글 찾기
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-        // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // 사용자 찾기
         UserEntity currentUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
 
-        // DTO 를 Entity 로 변환하고 게시글 정보 설정
         CommentEntity commentEntity = new CommentEntity();
         commentEntity.setCommentContent(commentDTO.getCommentContent());
-        commentEntity.setPost(post); // 댓글이 속한 게시글 설정
-        commentEntity.setUser(currentUser); // 댓글을 작성한 사용자 설정
+        commentEntity.setPost(post);
+        commentEntity.setUser(currentUser);
 
-        // 게시글에 댓글 추가
         post.addComment(commentEntity);
 
-        // 사용자가 작성한 댓글을 사용자의 댓글 목록에 추가
         currentUser.addComment(commentEntity);
 
-        // 댓글 저장
         CommentEntity savedEntity = commentRepository.save(commentEntity);
 
-        // 저장된 댓들의 ID 반환
+        // 댓글 알림 추가
+        Long commentId = savedEntity.getId();
+        Long postAuthorId = post.getUser().getId();
+        notificationService.sendNotification(postAuthorId, "comment", currentUser.getId(), postId, commentId);
+
         return savedEntity.getId();
     }
 

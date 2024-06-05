@@ -79,7 +79,7 @@ public class UserEntity implements UserDetails {
         chatRoom.setSender(this);
     }
 
-    // 채팅방 관력 메서드
+    // 채팅방 관련 메서드
     public void addReceivedChatRoom(ChatRoomEntity chatRoom) {
         this.receivedChatRooms.add(chatRoom);
         chatRoom.setReceiver(this);

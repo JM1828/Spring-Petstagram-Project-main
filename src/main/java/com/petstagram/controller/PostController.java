@@ -22,8 +22,9 @@ public class PostController {
 
     // 게시글 작성
     @PostMapping("/write")
-    public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO, @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO, @RequestPart("file") MultipartFile file, @RequestPart("breed") String breed) {
         try {
+            postDTO.setBreed(breed);
             postService.writePost(postDTO, file);
             return ResponseEntity.ok("게시글이 작성되었습니다.");
         } catch (Exception e) {

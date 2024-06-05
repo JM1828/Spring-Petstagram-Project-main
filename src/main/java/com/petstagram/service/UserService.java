@@ -163,6 +163,13 @@ public class UserService {
         return UserDTO.toDTO(userEntity);
     }
 
+    // 선택한 회원 마이페이지
+    public UserDTO getUserProfile(Long userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return UserDTO.toDTO(userEntity);
+    }
+
     // 모든 회원의 id, email, name, image 정보
     public List<UserProfileDTO> getAllUserProfiles() {
         return userRepository.findAllUserProfiles();

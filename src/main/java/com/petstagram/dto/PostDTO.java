@@ -7,6 +7,7 @@ import com.petstagram.entity.PostEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,8 +19,9 @@ import java.util.stream.Collectors;
 public class PostDTO {
     private Long id; // 게시물 고유 식별자
     private String postContent; // 게시물 내용(텍스트, 이미지, 비디오 링크 등).
+    private String breed;
     private String email; // 게시물을 작성한 사용자 email
-    private LocalDateTime regTime;
+    private String regTime;
     private List<ImageDTO> imageList;
     private List<CommentDTO> commentList;
 
@@ -31,8 +33,9 @@ public class PostDTO {
         return PostDTO.builder()
                 .id(postEntity.getId())
                 .postContent(postEntity.getPostContent())
+                .breed(postEntity.getBreed())
                 .email(postEntity.getUser().getEmail())
-                .regTime(postEntity.getRegTime())
+                .regTime(postEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
                 .imageList(postEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))
