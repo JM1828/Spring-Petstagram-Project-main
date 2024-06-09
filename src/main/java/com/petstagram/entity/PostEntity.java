@@ -44,7 +44,6 @@ public class PostEntity extends BaseEntity {
 
     // 게시물과 좋아요 수는 일대다 관계
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private Set<PostLikeEntity> postLikeList = new HashSet<>();
 
     // DTO -> Entity

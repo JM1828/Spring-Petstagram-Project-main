@@ -29,7 +29,7 @@ public class CommentService {
 
     // 댓글 작성
     public Long writeComment(Long postId, CommentDTO commentDTO) {
-        PostEntity post = postRepository.findById(postId)
+        PostEntity post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -59,7 +59,7 @@ public class CommentService {
     // 댓글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentList(Long postId) {
-        List<CommentEntity> commentList = commentRepository.findByPostId(postId);
+        List<CommentEntity> commentList = commentRepository.findByPostIdWithUser(postId);
         return commentList.stream().map(commentEntity -> {
             CommentDTO commentDTO = CommentDTO.toDTO(commentEntity);
 
@@ -74,7 +74,7 @@ public class CommentService {
     // 댓글 수정
     public CommentDTO updateComment(Long commentId, CommentDTO commentDTO) {
         // 댓글 찾기
-        CommentEntity commentEntity = commentRepository.findById(commentId)
+        CommentEntity commentEntity = commentRepository.findByIdAndFetchUser(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
 
         // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
@@ -98,7 +98,7 @@ public class CommentService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // 댓글 ID로 댓글 찾기
-        CommentEntity commentEntity = commentRepository.findById(commentId)
+        CommentEntity commentEntity = commentRepository.findByIdAndFetchUser(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다."));
 
         // 댓글 소유자가 현재 인증된 사용자인지 확인
@@ -111,7 +111,6 @@ public class CommentService {
     }
 
     // 댓글 좋아요 추가 또는 삭제
-    @Transactional
     public void toggleCommentLike(Long commentId) {
 
         // 댓글 찾기
@@ -142,6 +141,7 @@ public class CommentService {
     }
 
     // 댓글 좋아요 상태 조회
+    @Transactional(readOnly = true)
     public CommentDTO getCommentLikeStatus(Long commentId) {
         // 댓글 찾기
         CommentEntity comment = commentRepository.findById(commentId)

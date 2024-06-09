@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,16 +65,26 @@ public class ChatRoomController {
                 .orElseThrow(() -> new RuntimeException("수신자를 찾을 수 없습니다."));
         String receiverEmail = receiverUser.getEmail();
 
+        // 메시지 도착 시간에 따른 정렬 로직을 Comparator 변수에 저장
+        Comparator<ChatRoomDTO> sortByRegTimeDesc = Comparator.comparing(chatRoom -> {
+            if (chatRoom.getMessages().isEmpty()) {
+                return LocalDateTime.MIN;
+            } else {
+                String regTime = chatRoom.getMessages().get(0).getRegTime();
+                return LocalDateTime.parse(regTime, DateTimeFormatter.ISO_DATE_TIME);
+            }
+        }, Comparator.reverseOrder());
+
         // 채팅방 리스트 업데이트 알림 (메시지 도착 시간에 따라 정렬)
         List<ChatRoomDTO> updatedChatRoomListSender = chatRoomService.getActiveChatRoomList(principal)
                 .stream()
-                .sorted(Comparator.comparing(chatRoom -> chatRoom.getMessages().isEmpty() ? LocalDateTime.MIN : chatRoom.getMessages().get(0).getRegTime(), Comparator.reverseOrder()))
+                .sorted(sortByRegTimeDesc)
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + userEmail, updatedChatRoomListSender);
 
         List<ChatRoomDTO> updatedChatRoomListReceiver = chatRoomService.getActiveChatRoomList(() -> receiverEmail)
                 .stream()
-                .sorted(Comparator.comparing(chatRoom -> chatRoom.getMessages().isEmpty() ? LocalDateTime.MIN : chatRoom.getMessages().get(0).getRegTime(), Comparator.reverseOrder()))
+                .sorted(sortByRegTimeDesc)
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
     }

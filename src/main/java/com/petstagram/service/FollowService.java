@@ -6,17 +6,20 @@ import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.FollowRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FollowService {
 
     private final FollowRepository followRepository;
     private final NotificationService notificationService;
 
+    @Transactional
     public void follow(UserEntity fromUser, UserEntity toUser) throws Exception {
         // 본인 follow x
         if (fromUser.equals(toUser)) {
@@ -47,6 +50,7 @@ public class FollowService {
         notificationService.sendNotification(toUser.getId(), "following", fromUser.getId(), null, null);
     }
 
+    @Transactional
     public void unfollow(UserEntity fromUser, UserEntity toUser) throws Exception {
         FollowEntity follow = followRepository.findFollow(fromUser, toUser)
                 .orElseThrow(() -> new Exception("FOLLOW_NOT_FOUND: 팔로우 관계가 존재하지 않습니다"));
@@ -55,16 +59,16 @@ public class FollowService {
     }
 
     public List<UserDTO> getFollowingList(UserEntity user) {
-        List<UserEntity> followings = followRepository.findFollowingsByUser(user);
+        List<FollowEntity> followings = followRepository.findFollowingsByUser(user);
         return followings.stream()
-                .map(UserDTO::toDTO)
+                .map(follow -> UserDTO.toDTO(follow.getToUser()))
                 .collect(Collectors.toList());
     }
 
     public List<UserDTO> getFollowerList(UserEntity user) {
-        List<UserEntity> followers = followRepository.findFollowersByUser(user);
+        List<FollowEntity> followers = followRepository.findFollowersByUser(user);
         return followers.stream()
-                .map(UserDTO::toDTO)
+                .map(follow -> UserDTO.toDTO(follow.getFromUser()))
                 .collect(Collectors.toList());
     }
 

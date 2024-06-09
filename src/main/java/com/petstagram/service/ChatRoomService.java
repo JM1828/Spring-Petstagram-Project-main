@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -130,7 +131,14 @@ public class ChatRoomService {
                             .receiverName(chatRoomEntity.getReceiver().getName())
                             .build();
                 })
-                .sorted(Comparator.comparing(chatRoom -> chatRoom.getMessages().isEmpty() ? LocalDateTime.MIN : chatRoom.getMessages().get(0).getRegTime(), Comparator.reverseOrder()))
+                .sorted(Comparator.comparing(chatRoom -> {
+                    if (chatRoom.getMessages().isEmpty()) {
+                        return LocalDateTime.MIN;
+                    } else {
+                        String regTime = chatRoom.getMessages().get(0).getRegTime();
+                        return LocalDateTime.parse(regTime, DateTimeFormatter.ISO_DATE_TIME);
+                    }
+                }, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
 
         return chatRoomDTOs;
@@ -142,20 +150,19 @@ public class ChatRoomService {
         UserEntity currentUser = userRepository.findByEmail(name)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 현재 사용자가 송신자 또는 수신자인 모든 채팅방의 ID 목록을 가져옴
-        List<Long> activeChatRoomIdsAsSender = messageRepository.findChatRoomIdsBySenderId(currentUser.getId());
-        List<Long> activeChatRoomIdsAsReceiver = messageRepository.findChatRoomIdsByReceiverId(currentUser.getId());
+        // 현재 사용자가 송신자 또는 수신자인 모든 채팅방과 관련된 메시지를 패치 조인을 통해 한 번에 로드
+        List<ChatRoomEntity> activeChatRooms = chatRoomRepository.findActiveChatRoomsByUser(currentUser);
 
-        // 중복 채팅방 제외하고 필터링
-        Set<Long> distinctChatRoomIds = new HashSet<>();
-        distinctChatRoomIds.addAll(activeChatRoomIdsAsSender);
-        distinctChatRoomIds.addAll(activeChatRoomIdsAsReceiver);
+        // 각 채팅방의 ID를 추출하여 중복을 제거하고 필터링
+        Set<Long> distinctChatRoomIds = activeChatRooms.stream()
+                .map(ChatRoomEntity::getId)
+                .collect(Collectors.toSet());
 
         // 활성 채팅방 ID 목록을 기반으로 채팅방 엔티티 조회
-        List<ChatRoomEntity> activeChatRooms = chatRoomRepository.findAllById(new ArrayList<>(distinctChatRoomIds));
+        List<ChatRoomEntity> distinctActiveChatRooms = chatRoomRepository.findAllById(new ArrayList<>(distinctChatRoomIds));
 
         // 각 채팅방을 ChatRoomDTO로 변환하여 리스트에 추가하고, 메시지의 도착 시간에 따라 정렬
-        List<ChatRoomDTO> chatRoomDTOs = activeChatRooms.stream()
+        List<ChatRoomDTO> chatRoomDTOs = distinctActiveChatRooms.stream()
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
@@ -168,7 +175,14 @@ public class ChatRoomService {
                             .receiverName(chatRoomEntity.getReceiver().getName())
                             .build();
                 })
-                .sorted(Comparator.comparing(chatRoom -> chatRoom.getMessages().isEmpty() ? LocalDateTime.MIN : chatRoom.getMessages().get(0).getRegTime(), Comparator.reverseOrder()))
+                .sorted(Comparator.comparing(chatRoom -> {
+                    if (chatRoom.getMessages().isEmpty()) {
+                        return LocalDateTime.MIN;
+                    } else {
+                        String regTime = chatRoom.getMessages().get(0).getRegTime();
+                        return LocalDateTime.parse(regTime, DateTimeFormatter.ISO_DATE_TIME);
+                    }
+                }, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
 
         return chatRoomDTOs;
@@ -185,11 +199,11 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 채팅방 찾기
-        ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
+        ChatRoomEntity chatRoom = chatRoomRepository.findChatRoomWithMessagesById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
         // 채팅방에 속한 가장 최근 메시지 목록 조회
-        List<MessageEntity> messages = messageRepository.findRecentMessagesByChatRoomId(chatRoomId);
+        List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);

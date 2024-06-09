@@ -5,6 +5,7 @@ import com.petstagram.entity.MessageEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ public class MessageDTO {
     private Long receiverId; // 메시지를 받은 사용자 ID
     private String receiverName; // 메시지를 받은 사용자 이름
     private String receiverEmail; // 메시지를 받은 사용자 이름
-    private LocalDateTime regTime;
+    private String regTime;
     private List<ImageDTO> imageList;
     private String imageUrl;
 
@@ -40,7 +41,7 @@ public class MessageDTO {
                 .receiverId(messageEntity.getReceiver().getId())
                 .receiverName(messageEntity.getReceiver().getName())
                 .receiverEmail(messageEntity.getReceiver().getEmail())
-                .regTime(messageEntity.getRegTime())
+                .regTime(messageEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
                 .imageList(messageEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))

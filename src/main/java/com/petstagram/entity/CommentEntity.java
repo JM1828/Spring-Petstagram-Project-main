@@ -41,7 +41,6 @@ public class CommentEntity extends BaseEntity {
 
     // 댓글과 좋아요 수는 일대다 관계
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private Set<CommentLikeEntity> commentLikeList = new HashSet<>();
 
     // == 연관관계 편의 메서드 == //

@@ -12,6 +12,7 @@ import com.petstagram.repository.PostRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -193,8 +194,9 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional(readOnly = true)
     public List<NotificationDTO> findByUserId(Long userId) {
-        List<NotificationEntity> notifications = notificationRepository.findByUserIdOrderByRegTimeDesc(userId);
+        List<NotificationEntity> notifications = notificationRepository.findByUserIdWithFetch(userId);
         return notifications.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());

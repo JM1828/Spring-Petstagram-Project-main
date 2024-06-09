@@ -1,5 +1,6 @@
 package com.petstagram.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petstagram.dto.ChatRoomDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,10 +31,12 @@ public class ChatRoomEntity {
     // 채팅룸과 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
+    @JsonIgnore
     private UserEntity sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
+    @JsonIgnore
     private UserEntity receiver;
 
     // 메시지를 추가하는 메서드

@@ -78,16 +78,7 @@ public class UserController {
     // 회원 마이페이지
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getMyProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        UserDTO response = userService.getMyInfo(email);
-        return ResponseEntity.ok(response);
-    }
-
-    // 선택한 회원 마이페이지
-    @GetMapping("/profile/{userId}")
-    public ResponseEntity<UserDTO> getUserProfile(@PathVariable Long userId) {
-        UserDTO response = userService.getUserProfile(userId);
+        UserDTO response = userService.getMyInfo();
         return ResponseEntity.ok(response);
     }
 

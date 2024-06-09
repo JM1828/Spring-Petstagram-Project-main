@@ -32,7 +32,7 @@ public class PostService {
     // 게시글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
     public List<PostDTO> getPostList() {
-        List<PostEntity> postEntityList = postRepository.findAllByOrderByIdDesc();
+        List<PostEntity> postEntityList = postRepository.findAllWithUser();
 
         return postEntityList.stream().map(postEntity -> {
             PostDTO postDTO = PostDTO.toDTO(postEntity);
@@ -44,7 +44,6 @@ public class PostService {
             return postDTO;
         }).collect(Collectors.toList());
     }
-
 
     // 게시글 작성
     public void writePost(PostDTO dto, MultipartFile file) {
@@ -78,7 +77,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public PostDTO readPost(Long postId) {
         // 게시글 ID로 게시물 찾기
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 게시물을 찾을 수 없습니다."));
 
         // 게시물에 대한 좋아요 개수 조회
@@ -91,17 +90,17 @@ public class PostService {
         return postDTO;
     }
 
-    // 사용자가 작성한 모든 게시물 및 좋아요 개수 조회
+    // 사용자가 작성한 게시물 및 좋아요 개수 조회
     @Transactional(readOnly = true)
     public List<PostDTO> getPostsByUserId(Long userId) {
-        List<PostEntity> postEntityList = postRepository.findByUserId(userId);
+        List<PostEntity> postEntityList = postRepository.findByUserIdWithLikes(userId);
 
         // Entity 리스트를 DTO 리스트로 변환
         return postEntityList.stream().map(postEntity -> {
             PostDTO postDTO = PostDTO.toDTO(postEntity);
 
-            // 특정 게시물에 대한 좋아요 개수 조회
-            long likesCount = postLikeRepository.countByPost(postEntity);
+            // 좋아요 개수 설정
+            long likesCount = postEntity.getPostLikeList().size();
             postDTO.setPostLikesCount(likesCount);
 
             return postDTO;
@@ -147,7 +146,6 @@ public class PostService {
     }
 
     // 게시물 좋아요 추가 또는 삭제
-    @Transactional
     public void togglePostLike(Long postId) {
 
         // 게시물 찾기
@@ -183,6 +181,7 @@ public class PostService {
     }
 
     // 게시물 좋아요 상태 조회
+    @Transactional(readOnly = true)
     public PostDTO getPostLikeStatus(Long postId) {
         // 게시물 찾기
         PostEntity post = postRepository.findById(postId)

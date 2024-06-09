@@ -9,6 +9,8 @@ import com.petstagram.service.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -157,37 +159,37 @@ public class UserService {
     }
 
     // 회원 마이페이지
-    public UserDTO getMyInfo(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. email = " + email));
-        return UserDTO.toDTO(userEntity);
-    }
+    @Transactional(readOnly = true)
+    public UserDTO getMyInfo() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    // 선택한 회원 마이페이지
-    public UserDTO getUserProfile(Long userId) {
-        UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        UserEntity userEntity = userRepository.findByEmailWithProfileImage(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. email"));
         return UserDTO.toDTO(userEntity);
     }
 
     // 모든 회원의 id, email, name, image 정보
+    @Transactional(readOnly = true)
     public List<UserProfileDTO> getAllUserProfiles() {
         return userRepository.findAllUserProfiles();
     }
 
+    @Transactional(readOnly = true)
     public UserDTO getUsersById(Long userId) {
         UserDTO userDTO = new UserDTO();
-        UserEntity usersById = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not found"));
+        UserEntity usersById = userRepository.findByIdWithProfileImage(userId).orElseThrow(() -> new RuntimeException("User Not found"));
         userDTO.setUserEntity(usersById);
         return userDTO;
     }
 
     // 팔로우 UserId 찾기
+    @Transactional(readOnly = true)
     public UserEntity getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND: 사용자를 찾을 수 없습니다. 이메일: " + email));
     }
 
+    @Transactional(readOnly = true)
     public UserEntity getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND: 사용자를 찾을 수 없습니다. ID: " + userId));
