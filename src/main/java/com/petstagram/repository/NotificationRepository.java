@@ -21,6 +21,8 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             "ORDER BY n.regTime DESC")
     List<NotificationEntity> findByUserIdWithFetch(@Param("userId") Long userId);
 
+    List<NotificationEntity> findByUserIdOrderByRegTimeDesc(Long userId);
+
     // 좋아요 중복 알림 확인
     Optional<NotificationEntity> findByUserIdAndFromUserIdAndPostIdAndEventType(Long userId, Long fromUserId, Long postId, String eventType);
 

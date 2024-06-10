@@ -93,18 +93,6 @@ public class ChatRoomController {
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverMessageCount);
     }
 
-    @MessageMapping("/enterRoom/{roomId}")
-    public void enterRoom(@DestinationVariable Long roomId, Principal principal) {
-        String userEmail = principal.getName();
-
-        // 채팅방의 모든 메시지를 읽음 처리
-        chatRoomService.markMessagesAsRead(roomId, userEmail);
-
-        // 읽지 않은 메시지 개수 업데이트
-        Long unreadMessageCount = chatRoomService.getUnreadMessageCountForUser(userEmail);
-        messagingTemplate.convertAndSend("/sub/messageCount/" + userEmail, unreadMessageCount);
-    }
-
     // 이미지 파일 업로드 후 URL 반환
     @PostMapping("/uploadImage")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -124,10 +112,14 @@ public class ChatRoomController {
         }
     }
 
-    // 채팅방 및 메시지 목록 조회
+    // 채팅방 및 메시지 목록 조회 및 개수 업데이트
     @GetMapping("/chatRooms/{chatRoomId}")
     public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
-        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesById(chatRoomId, principal);
+        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
+
+        // 메시지 개수 업데이트 (수신자에게만 보냄)
+        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(principal.getName());
+        messagingTemplate.convertAndSend("/sub/messageCount/" + principal.getName(), receiverMessageCount);
         return ResponseEntity.ok(chatRoomDTO);
     }
 }

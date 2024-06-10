@@ -188,22 +188,30 @@ public class ChatRoomService {
         return chatRoomDTOs;
     }
 
-    // 채팅방 ID에 해당하는 채팅방과 메시지들을 가져오는 메서드
-    public ChatRoomDTO getChatRoomWithMessagesById(Long chatRoomId, Principal principal) {
+    // 채팅방 ID에 해당하는 채팅방과 메시지들을 가져오고 읽음으로 처리하는 메서드
+    @Transactional
+    public ChatRoomDTO getChatRoomWithMessagesByIdAndMarkAsRead(Long chatRoomId, Principal principal) {
 
         // 현재 인증된 사용자의 이름(또는 이메일 등) 가져오기
         String name = principal.getName();
 
-        // 보내는 사람 찾기
-        userRepository.findByEmail(name)
+        // 사용자 찾기
+        UserEntity user = userRepository.findByEmail(name)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         // 채팅방 찾기
         ChatRoomEntity chatRoom = chatRoomRepository.findChatRoomWithMessagesById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
 
-        // 채팅방에 속한 가장 최근 메시지 목록 조회
+        // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
+
+        // 읽지 않은 메시지를 읽음으로 처리
+        List<MessageEntity> unreadMessages = messageRepository.findByChatRoomIdAndReceiverAndIsReadFalse(chatRoomId, user);
+        for (MessageEntity message : unreadMessages) {
+            message.setRead(true);
+        }
+        messageRepository.saveAll(unreadMessages);
 
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
@@ -218,18 +226,10 @@ public class ChatRoomService {
         return chatRoomDTO;
     }
 
+    // 채팅방 메시지 개수 업데이트
     public Long getUnreadMessageCountForUser(String userEmail) {
         UserEntity user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         return messageRepository.countByReceiverAndIsReadFalse(user);
-    }
-
-    // 채팅방을 읽은 것으로 표시하고, 해당 채팅방의 메시지 개수를 업데이트하는 메서드
-    public void markMessagesAsRead(Long roomId, String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        List<MessageEntity> unreadMessages = messageRepository.findByChatRoomIdAndReceiverAndIsReadFalse(roomId, user);
-        unreadMessages.forEach(message -> message.setRead(true));
-        messageRepository.saveAll(unreadMessages);
     }
 }
