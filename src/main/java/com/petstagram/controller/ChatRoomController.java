@@ -87,6 +87,22 @@ public class ChatRoomController {
                 .sorted(sortByRegTimeDesc)
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
+
+        // 메시지 개수 업데이트 (수신자에게만 보냄)
+        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
+        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverMessageCount);
+    }
+
+    @MessageMapping("/enterRoom/{roomId}")
+    public void enterRoom(@DestinationVariable Long roomId, Principal principal) {
+        String userEmail = principal.getName();
+
+        // 채팅방의 모든 메시지를 읽음 처리
+        chatRoomService.markMessagesAsRead(roomId, userEmail);
+
+        // 읽지 않은 메시지 개수 업데이트
+        Long unreadMessageCount = chatRoomService.getUnreadMessageCountForUser(userEmail);
+        messagingTemplate.convertAndSend("/sub/messageCount/" + userEmail, unreadMessageCount);
     }
 
     // 이미지 파일 업로드 후 URL 반환

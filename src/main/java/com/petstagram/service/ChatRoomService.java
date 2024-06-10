@@ -217,4 +217,19 @@ public class ChatRoomService {
 
         return chatRoomDTO;
     }
+
+    public Long getUnreadMessageCountForUser(String userEmail) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        return messageRepository.countByReceiverAndIsReadFalse(user);
+    }
+
+    // 채팅방을 읽은 것으로 표시하고, 해당 채팅방의 메시지 개수를 업데이트하는 메서드
+    public void markMessagesAsRead(Long roomId, String userEmail) {
+        UserEntity user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        List<MessageEntity> unreadMessages = messageRepository.findByChatRoomIdAndReceiverAndIsReadFalse(roomId, user);
+        unreadMessages.forEach(message -> message.setRead(true));
+        messageRepository.saveAll(unreadMessages);
+    }
 }

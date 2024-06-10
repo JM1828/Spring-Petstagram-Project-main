@@ -2,6 +2,7 @@ package com.petstagram.repository;
 
 import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.MessageEntity;
+import com.petstagram.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,10 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     // 수신자 ID를 기반으로 채팅방 ID 조회
     @Query("SELECT DISTINCT m.chatRoom.id FROM MessageEntity m WHERE m.receiver.id = :receiverId")
     List<Long> findChatRoomIdsByReceiverId(Long receiverId);
+
+    Long countByReceiver(UserEntity user);
+
+    Long countByReceiverAndIsReadFalse(UserEntity receiver);
+
+    List<MessageEntity> findByChatRoomIdAndReceiverAndIsReadFalse(Long chatRoomId, UserEntity receiver);
 }
