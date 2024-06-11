@@ -2,7 +2,9 @@ package com.petstagram.controller;
 
 import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.dto.MessageDTO;
+import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.UserEntity;
+import com.petstagram.repository.ChatRoomRepository;
 import com.petstagram.repository.UserRepository;
 import com.petstagram.service.ChatRoomService;
 import com.petstagram.service.FileUploadService;
@@ -32,6 +34,7 @@ public class ChatRoomController {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
+    private final ChatRoomRepository chatRoomRepository;
 
     // 채팅방 생성
     @PostMapping("/chatRooms")
@@ -75,6 +78,11 @@ public class ChatRoomController {
             }
         }, Comparator.reverseOrder());
 
+        // 메시지 전송 후, 채팅방의 메시지 개수 업데이트 알림
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
+        messagingTemplate.convertAndSend("/sub/messageCount/" + roomId, chatRoom.getMessageCount());
+
         // 채팅방 리스트 업데이트 알림 (메시지 도착 시간에 따라 정렬)
         List<ChatRoomDTO> updatedChatRoomListSender = chatRoomService.getActiveChatRoomList(principal)
                 .stream()
@@ -87,10 +95,6 @@ public class ChatRoomController {
                 .sorted(sortByRegTimeDesc)
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
-
-        // 메시지 개수 업데이트 (수신자에게만 보냄)
-        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
-        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverMessageCount);
     }
 
     // 이미지 파일 업로드 후 URL 반환
@@ -112,14 +116,17 @@ public class ChatRoomController {
         }
     }
 
-    // 채팅방 및 메시지 목록 조회 및 개수 업데이트
+    // 채팅방 및 메시지 목록 조회 및 메시지 개수 초기화
     @GetMapping("/chatRooms/{chatRoomId}")
-    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
-        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
-
-        // 메시지 개수 업데이트 (수신자에게만 보냄)
-        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(principal.getName());
-        messagingTemplate.convertAndSend("/sub/messageCount/" + principal.getName(), receiverMessageCount);
+    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId) {
+        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId);
         return ResponseEntity.ok(chatRoomDTO);
+    }
+
+    // 모든 채팅방의 메시지 개수 합산
+    @GetMapping("/chatRooms/totalMessageCount")
+    public ResponseEntity<Long> getTotalMessageCount() {
+        long totalMessageCount = chatRoomRepository.getTotalMessageCount();
+        return ResponseEntity.ok(totalMessageCount);
     }
 }

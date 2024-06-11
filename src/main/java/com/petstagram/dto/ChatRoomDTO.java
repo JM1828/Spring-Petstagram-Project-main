@@ -23,6 +23,7 @@ public class ChatRoomDTO {
     private String senderName; // 발신자 이름
     private Long receiverId; // 수신자 ID
     private String receiverName; // 수신자 이름
+    private boolean hasUnreadMessage; // 읽지 않은 메시지 여부
 
     // Entity -> DTO 변환 메서드
     public static ChatRoomDTO toDTO(ChatRoomEntity chatRoom) {
@@ -35,6 +36,7 @@ public class ChatRoomDTO {
                 .senderName(chatRoom.getSender().getName())
                 .receiverId(chatRoom.getReceiver().getId())
                 .receiverName(chatRoom.getReceiver().getName())
+                .hasUnreadMessage(chatRoom.isHasUnreadMessage())
                 .build();
     }
 }

@@ -35,4 +35,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
             "JOIN FETCH cr.messages m " +
             "WHERE cr.id = :chatRoomId")
     Optional<ChatRoomEntity> findChatRoomWithMessagesById(@Param("chatRoomId") Long chatRoomId);
+
+    @Query("SELECT SUM(c.messageCount) FROM ChatRoomEntity c")
+    long getTotalMessageCount();
 }

@@ -38,4 +38,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
     Long countByReceiverAndIsReadFalse(UserEntity receiver);
 
     List<MessageEntity> findByChatRoomIdAndReceiverAndIsReadFalse(Long chatRoomId, UserEntity receiver);
+
+    boolean existsByChatRoomIdAndReceiverAndIsReadFalse(Long id, UserEntity currentUser);
 }
