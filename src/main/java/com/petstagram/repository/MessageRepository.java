@@ -14,6 +14,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     boolean existsByChatRoomIdAndReceiverAndIsReadFalse(Long id, UserEntity currentUser);
 
-    @Query("SELECT SUM(c.messageCount) FROM ChatRoomEntity c WHERE c.sender = :user OR c.receiver = :user")
-    Long countUnreadMessagesByUser(@Param("user") UserEntity user);
+    @Query("SELECT COUNT(m) FROM MessageEntity m WHERE m.receiver = :receiver AND m.isRead = false")
+    Long countUnreadMessagesByReceiver(@Param("receiver") UserEntity receiver);
 }

@@ -109,11 +109,10 @@ public class ChatRoomService {
     }
 
     // 채팅방 메시지 개수 업데이트
-    public Long getUnreadMessageCountForUser(String userEmail) {
-        UserEntity user = userRepository.findByEmail(userEmail)
+    public Long getUnreadMessageCountForUser(String receiverEmail) {
+        UserEntity user = userRepository.findByEmail(receiverEmail)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        return messageRepository.countUnreadMessagesByUser(user);
+        return messageRepository.countUnreadMessagesByReceiver(user);
     }
 
     // 채팅방 리스트 조회

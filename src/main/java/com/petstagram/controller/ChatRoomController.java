@@ -36,6 +36,7 @@ public class ChatRoomController {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
     private final MessageRepository messageRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     // 채팅방 생성
     @PostMapping("/chatRooms")
@@ -97,6 +98,14 @@ public class ChatRoomController {
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverMessageCount);
     }
 
+    // 수신자 채팅방의 메시지 개수
+    @GetMapping("/chatRooms/totalMessageCount/{receiverEmail}")
+    public ResponseEntity<Long> getTotalMessageCount(@PathVariable String receiverEmail) {
+        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
+        System.out.println("수신자 ID :" + receiverEmail + "메시지 개수 " + receiverMessageCount);
+        return ResponseEntity.ok(receiverMessageCount);
+    }
+
     // 이미지 파일 업로드 후 URL 반환
     @PostMapping("/uploadImage")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -124,10 +133,10 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomDTO);
     }
 
-    // 수신자 채팅방의 메시지 개수
-    @GetMapping("/chatRooms/totalMessageCount/{receiverEmail}")
-    public ResponseEntity<Long> getTotalMessageCount(@PathVariable String receiverEmail) {
-        long totalMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
-        return ResponseEntity.ok(totalMessageCount);
-    }
+//    // 모든 채팅방의 메시지 개수 합산
+//    @GetMapping("/chatRooms/totalMessageCount/{receiverEmail}")
+//    public ResponseEntity<Long> getTotalMessageCount(@PathVariable String receiverEmail) {
+//        Long totalMessageCount = chatRoomRepository.getUnreadMessageCountForUser(receiverEmail);
+//        return ResponseEntity.ok(totalMessageCount);
+//    }
 }
