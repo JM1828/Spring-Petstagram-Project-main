@@ -2,7 +2,6 @@ package com.petstagram.service;
 
 import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.dto.MessageDTO;
-import com.petstagram.dto.UserDTO;
 import com.petstagram.entity.*;
 import com.petstagram.repository.ChatRoomRepository;
 import com.petstagram.repository.MessageRepository;
@@ -103,23 +102,10 @@ public class ChatRoomService {
         // 메시지 저장
         MessageEntity savedMessage = messageRepository.save(messageEntity);
 
+        // 채팅방의 메시지 개수 업데이트
+        chatRoomRepository.save(chatRoom);
+
         return MessageDTO.toDTO(savedMessage);
-    }
-
-    // 읽지 않은 메시지 개수 증가 메서드
-    public UserDTO incrementUnreadMessageCount(Long receiverId) {
-        UserEntity receiverUser = userRepository.findById(receiverId)
-                .orElseThrow(() -> new RuntimeException("수신자를 찾을 수 없습니다."));
-        receiverUser.incrementUnreadMessages();
-        UserEntity savedUser = userRepository.save(receiverUser);
-        return UserDTO.toDTO(savedUser);
-    }
-
-    // 채팅방 메시지 개수 업데이트
-    public Long getUnreadMessageCountForUser(String receiverEmail) {
-        UserEntity user = userRepository.findByEmail(receiverEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        return messageRepository.countUnreadMessagesByReceiver(user);
     }
 
     // 채팅방 리스트 조회
@@ -150,6 +136,7 @@ public class ChatRoomService {
                             .senderName(chatRoomEntity.getSender().getName())
                             .receiverId(chatRoomEntity.getReceiver().getId())
                             .receiverName(chatRoomEntity.getReceiver().getName())
+//                            .hasUnreadMessage(hasUnreadMessage)
                             .build();
                 })
                 .sorted(Comparator.comparing(chatRoom -> {
@@ -211,7 +198,11 @@ public class ChatRoomService {
 
     // 채팅방 ID에 해당하는 채팅방과 메시지들을 가져오고 읽음으로 처리하는 메서드
     @Transactional
-    public ChatRoomDTO getChatRoomWithMessagesByIdAndMarkAsRead(Long chatRoomId, String userEmail) {
+    public ChatRoomDTO getChatRoomWithMessagesByIdAndMarkAsRead(Long chatRoomId, Principal principal) {
+
+        // 현재 사용자를 가져오기
+        UserEntity currentUser = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 채팅방 찾기
         ChatRoomEntity chatRoom = chatRoomRepository.findChatRoomWithMessagesById(chatRoomId)
@@ -220,18 +211,12 @@ public class ChatRoomService {
         // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
-        // 메시지를 읽음 상태로 업데이트 (수신자가 현재 사용자일 때만)
-        for (MessageEntity message : messages) {
-            if (!message.isRead() && message.getReceiver().getEmail().equals(userEmail)) {
-                message.setRead(true);
-            }
-        }
-
-        messageRepository.saveAll(messages);
-        chatRoomRepository.save(chatRoom);
-
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
+
+        // 메시지 개수 초기화
+        chatRoom.resetMessageCount();
+        chatRoomRepository.save(chatRoom);
 
         // 메시지 정보 설정
         List<MessageDTO> messageDTOs = messages.stream()

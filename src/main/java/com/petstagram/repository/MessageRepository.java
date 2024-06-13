@@ -13,7 +13,4 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
 
     boolean existsByChatRoomIdAndReceiverAndIsReadFalse(Long id, UserEntity currentUser);
-
-    @Query("SELECT COUNT(m) FROM MessageEntity m WHERE m.receiver = :receiver AND m.isRead = false")
-    Long countUnreadMessagesByReceiver(@Param("receiver") UserEntity receiver);
 }

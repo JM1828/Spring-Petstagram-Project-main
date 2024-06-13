@@ -24,6 +24,10 @@ public class ChatRoomEntity {
     @Column(name = "chatRoom_id")
     private Long id;
 
+    private boolean hasUnreadMessage; // 읽지 않은 메시지 여부
+
+    private long unreadMessageCount; // 메시지 개수
+
     // 채팅룸과 메시지 는 일대다 관계
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages = new ArrayList<>();
@@ -42,6 +46,16 @@ public class ChatRoomEntity {
     // 메시지를 추가하는 메서드
     public void addMessage(MessageEntity message) {
         this.messages.add(message);
+        if (message.getChatRoom() != this) {
             message.setChatRoom(this);
+        }
+        this.unreadMessageCount++;
+        this.hasUnreadMessage = true; // 새로운 메시지가 추가될 때 읽지 않은 메시지가 있다고 표시
+    }
+
+    // 메시지를 읽었을 때 메시지 개수 초기화
+    public void resetMessageCount() {
+        this.unreadMessageCount = 0;
+        this.hasUnreadMessage = true;
     }
 }

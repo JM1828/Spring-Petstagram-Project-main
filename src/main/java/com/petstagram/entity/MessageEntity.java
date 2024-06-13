@@ -26,8 +26,6 @@ public class MessageEntity extends BaseEntity{
 
     private String messageContent; // 메시지 내용.
 
-    private long messageCount; // 메시지 개수
-
     private boolean isRead = false;
 
     // 메시지와 사용자는 다대일 관계

@@ -2,11 +2,9 @@ package com.petstagram.controller;
 
 import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.dto.MessageDTO;
-import com.petstagram.dto.UserDTO;
 import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.ChatRoomRepository;
-import com.petstagram.repository.MessageRepository;
 import com.petstagram.repository.UserRepository;
 import com.petstagram.service.ChatRoomService;
 import com.petstagram.service.FileUploadService;
@@ -36,7 +34,6 @@ public class ChatRoomController {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
-    private final MessageRepository messageRepository;
     private final ChatRoomRepository chatRoomRepository;
 
     // 채팅방 생성
@@ -62,7 +59,7 @@ public class ChatRoomController {
         // 메시지 전송 후, 해당 채팅방을 구독하는 클라이언트에게 메시지 정보 업데이트 알림
         messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, sentMessage);
 
-        // Principal 에서 사용자 ID를 가져옴
+        // Principal 에서 사용자 ID를 가져옴 (보통 사용자 이름을 반환)
         String userEmail = principal.getName();
 
         // 상대방 사용자 ID 가져오기
@@ -94,17 +91,27 @@ public class ChatRoomController {
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
 
-        // 메시지 개수 업데이트 (수신자에게만 보냄)
-        UserDTO receiverMessageCount = chatRoomService.incrementUnreadMessageCount(receiverId);
-        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverId, receiverMessageCount);
+        // 메시지 전송 후, 채팅방의 메시지 개수 업데이트 알림
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
+        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, chatRoom.getUnreadMessageCount());
     }
 
-    // 수신자 채팅방의 메시지 개수
-    @GetMapping("/chatRooms/totalMessageCount/{receiverEmail}")
-    public ResponseEntity<Long> getTotalMessageCount(@PathVariable String receiverEmail) {
-        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
-        System.out.println("수신자 ID :" + receiverEmail + "메시지 개수 " + receiverMessageCount);
-        return ResponseEntity.ok(receiverMessageCount);
+    // 채팅방의 메시지 개수 합산
+    @GetMapping("/chatRooms/totalMessageCount")
+    public ResponseEntity<?> getTotalMessageCount(Principal principal) {
+        String receiverEmail = principal.getName();
+        String senderEmail = principal.getName();
+
+        if (principal.equals(receiverEmail)) {
+            Long totalMessageCount = chatRoomRepository.getTotalUnreadMessageCountByReceiver(receiverEmail);
+            return ResponseEntity.ok(totalMessageCount);
+        }
+
+        if (principal.equals(senderEmail)) {
+            Long totalMessageCount = chatRoomRepository.getTotalUnreadMessageCountBySender(senderEmail);
+            return ResponseEntity.ok(totalMessageCount);
+        }
     }
 
     // 이미지 파일 업로드 후 URL 반환
@@ -128,16 +135,8 @@ public class ChatRoomController {
 
     // 채팅방 및 메시지 목록 조회 및 메시지 개수 초기화
     @GetMapping("/chatRooms/{chatRoomId}")
-    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessages(@PathVariable Long chatRoomId, Principal principal) {
-        String userEmail = principal.getName();
-        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, userEmail);
+    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
+        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
         return ResponseEntity.ok(chatRoomDTO);
     }
-
-//    // 모든 채팅방의 메시지 개수 합산
-//    @GetMapping("/chatRooms/totalMessageCount/{receiverEmail}")
-//    public ResponseEntity<Long> getTotalMessageCount(@PathVariable String receiverEmail) {
-//        Long totalMessageCount = chatRoomRepository.getUnreadMessageCountForUser(receiverEmail);
-//        return ResponseEntity.ok(totalMessageCount);
-//    }
 }

@@ -35,4 +35,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
             "JOIN FETCH cr.messages m " +
             "WHERE cr.id = :chatRoomId")
     Optional<ChatRoomEntity> findChatRoomWithMessagesById(@Param("chatRoomId") Long chatRoomId);
+
+    @Query("SELECT SUM(c.unreadMessageCount) FROM ChatRoomEntity c WHERE c.receiver.email = :email")
+    Long getTotalUnreadMessageCountByReceiver(@Param("email") String email);
+
+    @Query("SELECT SUM(c.unreadMessageCount) FROM ChatRoomEntity c WHERE c.sender.email = :email")
+    Long getTotalUnreadMessageCountBySender(@Param("email") String email);
 }

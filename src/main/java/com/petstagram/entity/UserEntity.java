@@ -30,8 +30,6 @@ public class UserEntity implements UserDetails {
     private String password;
     private String role = "USER";
 
-    private Long unreadMessages = 0L;
-
     // 추가
     private String gender; // 성별
     private String bio; // 사용자 소개
@@ -123,14 +121,6 @@ public class UserEntity implements UserDetails {
         }
         this.profileImage = profileImage;
     }
-
-    public void incrementUnreadMessages() {
-        if (this.unreadMessages == null) {
-            this.unreadMessages = 0L;
-        }
-        this.unreadMessages += 1;
-    }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
