@@ -2,6 +2,7 @@ package com.petstagram.controller;
 
 import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.dto.MessageDTO;
+import com.petstagram.dto.UserDTO;
 import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.ChatRoomRepository;
@@ -61,7 +62,7 @@ public class ChatRoomController {
         // 메시지 전송 후, 해당 채팅방을 구독하는 클라이언트에게 메시지 정보 업데이트 알림
         messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, sentMessage);
 
-        // Principal 에서 사용자 ID를 가져옴 (보통 사용자 이름을 반환)
+        // Principal 에서 사용자 ID를 가져옴
         String userEmail = principal.getName();
 
         // 상대방 사용자 ID 가져오기
@@ -94,8 +95,8 @@ public class ChatRoomController {
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
 
         // 메시지 개수 업데이트 (수신자에게만 보냄)
-        Long receiverMessageCount = chatRoomService.getUnreadMessageCountForUser(receiverEmail);
-        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverMessageCount);
+        UserDTO receiverMessageCount = chatRoomService.incrementUnreadMessageCount(receiverId);
+        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverId, receiverMessageCount);
     }
 
     // 수신자 채팅방의 메시지 개수

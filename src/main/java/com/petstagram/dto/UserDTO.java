@@ -29,6 +29,7 @@ public class UserDTO {
     private String token;   // 사용자의 세션 또는 인증을 확인하기 위해 사용되는 JWT
     private String refreshToken;    // token 이 만료되었을 때, 새로운 token 을 발급받기 위해 사용되는 토큰
     private ProfileImageDTO profileImage;
+    private Long unreadMessages;
 
     private UserEntity userEntity;
     private List<UserEntity> userEntityList;
@@ -43,6 +44,7 @@ public class UserDTO {
                 .gender(userEntity.getGender())
                 .bio(userEntity.getBio())
                 .isRecommend(userEntity.getIsRecommend())
+                .unreadMessages(userEntity.getUnreadMessages())
                 .build();
 
         if (userEntity.getProfileImage() != null) {
