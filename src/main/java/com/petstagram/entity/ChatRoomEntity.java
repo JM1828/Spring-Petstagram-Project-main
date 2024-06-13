@@ -24,9 +24,13 @@ public class ChatRoomEntity {
     @Column(name = "chatRoom_id")
     private Long id;
 
-    private boolean hasUnreadMessage; // 읽지 않은 메시지 여부
+    private boolean senderHasUnreadMessage; // 발신자의 읽지 않은 메시지 여부
 
-    private long unreadMessageCount; // 메시지 개수
+    private long senderUnreadMessageCount; // 발신자의 메시지 개수
+
+    private boolean receiverHasUnreadMessage; // 수신자의 읽지 않은 메시지 여부
+
+    private long receiverUnreadMessageCount; // 수신자의 메시지 개수
 
     // 채팅룸과 메시지 는 일대다 관계
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,13 +53,26 @@ public class ChatRoomEntity {
         if (message.getChatRoom() != this) {
             message.setChatRoom(this);
         }
-        this.unreadMessageCount++;
-        this.hasUnreadMessage = true; // 새로운 메시지가 추가될 때 읽지 않은 메시지가 있다고 표시
+        if (message.getSender().getId().equals(this.sender.getId())) {
+            // 발신자가 보낸 메시지일 경우
+            this.senderUnreadMessageCount++;
+            this.senderHasUnreadMessage = true;
+        } else if (message.getSender().getId().equals(this.receiver.getId())) {
+            // 수신자가 보낸 메시지일 경우
+            this.receiverUnreadMessageCount++;
+            this.receiverHasUnreadMessage = true;
+        }
     }
 
-    // 메시지를 읽었을 때 메시지 개수 초기화
-    public void resetMessageCount() {
-        this.unreadMessageCount = 0;
-        this.hasUnreadMessage = true;
+    // 발신자의 메시지 개수 초기화
+    public void resetSenderMessageCount() {
+        this.senderUnreadMessageCount = 0;
+        this.senderHasUnreadMessage = false;
+    }
+
+    // 수신자의 메시지 개수 초기화
+    public void resetReceiverMessageCount() {
+        this.receiverUnreadMessageCount = 0;
+        this.receiverHasUnreadMessage = false;
     }
 }

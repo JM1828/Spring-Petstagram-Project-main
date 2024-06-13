@@ -36,7 +36,6 @@ public class ChatRoomDTO {
                 .senderName(chatRoom.getSender().getName())
                 .receiverId(chatRoom.getReceiver().getId())
                 .receiverName(chatRoom.getReceiver().getName())
-                .hasUnreadMessage(chatRoom.isHasUnreadMessage())
                 .build();
     }
 }

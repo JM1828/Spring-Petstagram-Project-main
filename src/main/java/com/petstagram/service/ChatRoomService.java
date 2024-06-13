@@ -215,7 +215,7 @@ public class ChatRoomService {
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
 
         // 메시지 개수 초기화
-        chatRoom.resetMessageCount();
+        chatRoom.resetSenderMessageCount();
         chatRoomRepository.save(chatRoom);
 
         // 메시지 정보 설정
