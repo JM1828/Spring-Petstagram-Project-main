@@ -48,31 +48,35 @@ public class ChatRoomEntity {
     private UserEntity receiver;
 
     // 메시지를 추가하는 메서드
+//    public void addMessage(MessageEntity message) {
+//        this.messages.add(message);
+//        if (message.getChatRoom() != this) {
+//            message.setChatRoom(this);
+//        }
+//        if (message.getSender().getId().equals(this.sender.getId())) {
+//            // 발신자가 보낸 메시지일 경우, 수신자의 읽지 않은 메시지 개수를 증가
+//            this.receiverUnreadMessageCount++;
+//            this.receiverHasUnreadMessage = true;
+//        } else if (message.getSender().getId().equals(this.receiver.getId())) {
+//            // 수신자가 보낸 메시지일 경우, 발신자의 읽지 않은 메시지 개수를 증가
+//            this.senderUnreadMessageCount++;
+//            this.senderHasUnreadMessage = true;
+//        }
+//    }
+
     public void addMessage(MessageEntity message) {
         this.messages.add(message);
-        if (message.getChatRoom() != this) {
-            message.setChatRoom(this);
-        }
-        if (message.getSender().getId().equals(this.sender.getId())) {
-            // 발신자가 보낸 메시지일 경우
-            this.senderUnreadMessageCount++;
-            this.senderHasUnreadMessage = true;
-        } else if (message.getSender().getId().equals(this.receiver.getId())) {
-            // 수신자가 보낸 메시지일 경우
-            this.receiverUnreadMessageCount++;
-            this.receiverHasUnreadMessage = true;
-        }
+        message.setChatRoom(this);
     }
 
-    // 발신자의 메시지 개수 초기화
-    public void resetSenderMessageCount() {
-        this.senderUnreadMessageCount = 0;
-        this.senderHasUnreadMessage = false;
-    }
-
-    // 수신자의 메시지 개수 초기화
-    public void resetReceiverMessageCount() {
-        this.receiverUnreadMessageCount = 0;
-        this.receiverHasUnreadMessage = false;
+    // 메시지를 읽었을 때 호출하는 메서드
+    public void markMessageAsRead(UserEntity user) {
+        if (user.getId().equals(this.sender.getId())) {
+            this.senderUnreadMessageCount = 0;
+            this.senderHasUnreadMessage = false;
+        } else if (user.getId().equals(this.receiver.getId())) {
+            this.receiverUnreadMessageCount = 0;
+            this.receiverHasUnreadMessage = false;
+        }
     }
 }

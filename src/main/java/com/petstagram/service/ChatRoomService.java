@@ -102,9 +102,6 @@ public class ChatRoomService {
         // 메시지 저장
         MessageEntity savedMessage = messageRepository.save(messageEntity);
 
-        // 채팅방의 메시지 개수 업데이트
-        chatRoomRepository.save(chatRoom);
-
         return MessageDTO.toDTO(savedMessage);
     }
 
@@ -174,6 +171,9 @@ public class ChatRoomService {
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
+                    // 데이터베이스에서 읽지 않은 메시지 개수 계산
+                    int unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+
                     return ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
                             .messages(recentMessages.stream().map(MessageDTO::toDTO).collect(Collectors.toList()))
@@ -181,6 +181,7 @@ public class ChatRoomService {
                             .senderName(chatRoomEntity.getSender().getName())
                             .receiverId(chatRoomEntity.getReceiver().getId())
                             .receiverName(chatRoomEntity.getReceiver().getName())
+                            .unreadMessageCount(unreadMessageCount)
                             .build();
                 })
                 .sorted(Comparator.comparing(chatRoom -> {
@@ -215,7 +216,7 @@ public class ChatRoomService {
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
 
         // 메시지 개수 초기화
-        chatRoom.resetSenderMessageCount();
+        chatRoom.markMessageAsRead(currentUser);
         chatRoomRepository.save(chatRoom);
 
         // 메시지 정보 설정
