@@ -36,11 +36,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
             "WHERE cr.id = :chatRoomId")
     Optional<ChatRoomEntity> findChatRoomWithMessagesById(@Param("chatRoomId") Long chatRoomId);
 
-    // 발신자가 보낸 안 읽은 메시지 개수 쿼리
-    @Query("SELECT SUM(c.receiverUnreadMessageCount) FROM ChatRoomEntity c WHERE c.sender.email = :senderEmail")
-    Long getTotalUnreadMessageCountBySender(@Param("senderEmail") String senderEmail);
-
-    // 수신자가 보낸 안 읽은 메시지 개수 쿼리
-    @Query("SELECT SUM(c.senderUnreadMessageCount) FROM ChatRoomEntity c WHERE c.receiver.email = :receiverEmail")
-    Long getTotalUnreadMessageCountByReceiver(@Param("receiverEmail") String receiverEmail);
 }

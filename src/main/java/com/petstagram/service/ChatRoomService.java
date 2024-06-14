@@ -7,6 +7,7 @@ import com.petstagram.repository.ChatRoomRepository;
 import com.petstagram.repository.MessageRepository;
 import com.petstagram.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 채팅방 생성
     @Transactional
@@ -166,7 +168,7 @@ public class ChatRoomService {
         // 활성 채팅방 ID 목록을 기반으로 채팅방 엔티티 조회
         List<ChatRoomEntity> distinctActiveChatRooms = chatRoomRepository.findAllById(new ArrayList<>(distinctChatRoomIds));
 
-        // 각 채팅방을 ChatRoomDTO로 변환하여 리스트에 추가하고, 메시지의 도착 시간에 따라 정렬
+        // 각 채팅방을 ChatRoomDTO 로 변환하여 리스트에 추가하고, 메시지의 도착 시간에 따라 정렬
         List<ChatRoomDTO> chatRoomDTOs = distinctActiveChatRooms.stream()
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
@@ -212,12 +214,19 @@ public class ChatRoomService {
         // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
+        // 메시지를 읽음으로 처리
+        messages.forEach(message -> {
+            if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
+                message.setRead(true);
+                messageRepository.save(message); // 메시지 상태 갱신
+            }
+        });
+
+        // 읽지 않은 메시지 개수 계산
+//        int unreadMessageCount = messageRepository.countUnreadMessages(chatRoomId, currentUser.getId());
+
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
-
-        // 메시지 개수 초기화
-        chatRoom.markMessageAsRead(currentUser);
-        chatRoomRepository.save(chatRoom);
 
         // 메시지 정보 설정
         List<MessageDTO> messageDTOs = messages.stream()
@@ -225,6 +234,9 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
 
         chatRoomDTO.setMessages(messageDTOs);
+
+        // 특정 채팅방에 대한 메시지 개수 업데이트 알림 전송
+//        messagingTemplate.convertAndSend("/sub/messageCount/" + currentUser.getEmail(), unreadMessageCount);
 
         return chatRoomDTO;
     }

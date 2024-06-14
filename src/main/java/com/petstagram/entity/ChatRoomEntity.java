@@ -24,14 +24,6 @@ public class ChatRoomEntity {
     @Column(name = "chatRoom_id")
     private Long id;
 
-    private boolean senderHasUnreadMessage; // 발신자의 읽지 않은 메시지 여부
-
-    private long senderUnreadMessageCount; // 발신자의 메시지 개수
-
-    private boolean receiverHasUnreadMessage; // 수신자의 읽지 않은 메시지 여부
-
-    private long receiverUnreadMessageCount; // 수신자의 메시지 개수
-
     // 채팅룸과 메시지 는 일대다 관계
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages = new ArrayList<>();
@@ -47,36 +39,8 @@ public class ChatRoomEntity {
     @JsonIgnore
     private UserEntity receiver;
 
-    // 메시지를 추가하는 메서드
-//    public void addMessage(MessageEntity message) {
-//        this.messages.add(message);
-//        if (message.getChatRoom() != this) {
-//            message.setChatRoom(this);
-//        }
-//        if (message.getSender().getId().equals(this.sender.getId())) {
-//            // 발신자가 보낸 메시지일 경우, 수신자의 읽지 않은 메시지 개수를 증가
-//            this.receiverUnreadMessageCount++;
-//            this.receiverHasUnreadMessage = true;
-//        } else if (message.getSender().getId().equals(this.receiver.getId())) {
-//            // 수신자가 보낸 메시지일 경우, 발신자의 읽지 않은 메시지 개수를 증가
-//            this.senderUnreadMessageCount++;
-//            this.senderHasUnreadMessage = true;
-//        }
-//    }
-
     public void addMessage(MessageEntity message) {
         this.messages.add(message);
         message.setChatRoom(this);
-    }
-
-    // 메시지를 읽었을 때 호출하는 메서드
-    public void markMessageAsRead(UserEntity user) {
-        if (user.getId().equals(this.sender.getId())) {
-            this.senderUnreadMessageCount = 0;
-            this.senderHasUnreadMessage = false;
-        } else if (user.getId().equals(this.receiver.getId())) {
-            this.receiverUnreadMessageCount = 0;
-            this.receiverHasUnreadMessage = false;
-        }
     }
 }

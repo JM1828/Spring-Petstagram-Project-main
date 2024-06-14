@@ -1,5 +1,6 @@
 package com.petstagram.repository;
 
+import com.petstagram.dto.ChatRoomDTO;
 import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.MessageEntity;
 import com.petstagram.entity.UserEntity;

@@ -36,7 +36,6 @@ public class ChatRoomController {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
     private final ChatRoomRepository chatRoomRepository;
-    private final MessageRepository messageRepository;
 
     // 채팅방 생성
     @PostMapping("/chatRooms")
@@ -91,17 +90,13 @@ public class ChatRoomController {
 
         // 발신자와 수신자의 메시지 개수 업데이트 알림
         int senderUnreadCount = updatedChatRoomListSender.stream()
-                .filter(chatRoomDTO -> chatRoomDTO.getId().equals(chatRoom.getId()))
-                .findFirst()
-                .map(ChatRoomDTO::getUnreadMessageCount)
-                .orElse(0);
+                .mapToInt(ChatRoomDTO::getUnreadMessageCount)
+                .sum();
         messagingTemplate.convertAndSend("/sub/messageCount/" + senderEmail, senderUnreadCount);
 
         int receiverUnreadCount = updatedChatRoomListReceiver.stream()
-                .filter(chatRoomDTO -> chatRoomDTO.getId().equals(chatRoom.getId()))
-                .findFirst()
-                .map(ChatRoomDTO::getUnreadMessageCount)
-                .orElse(0);
+                .mapToInt(ChatRoomDTO::getUnreadMessageCount)
+                .sum();
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
     }
 
@@ -116,10 +111,6 @@ public class ChatRoomController {
     @GetMapping("/unreadMessageCount")
     public ResponseEntity<Integer> getUnreadMessageCount(Principal principal) {
 
-        // Principal 에서 사용자 이메일을 가져옴
-        userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
         // 사용자의 모든 채팅방 목록을 가져옴
         List<ChatRoomDTO> chatRoomList = chatRoomService.getActiveChatRoomList(principal);
 
@@ -131,20 +122,20 @@ public class ChatRoomController {
         return ResponseEntity.ok(totalUnreadCount);
     }
 
-    // 특정 채팅방의 읽지 않은 메시지 개수를 반환
-    @GetMapping("/unreadMessageCount/{roomId}")
-    public ResponseEntity<Integer> getUnreadMessageCountForRoom(@PathVariable Long roomId, Principal principal) {
-
-        // Principal 에서 사용자 이메일을 가져옴
-        String userEmail = principal.getName();
-        UserEntity currentUser = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        // 특정 채팅방에서의 읽지 않은 메시지 개수를 가져옴
-        int unreadCount = messageRepository.countUnreadMessages(roomId, currentUser.getId());
-
-        return ResponseEntity.ok(unreadCount);
-    }
+//    // 특정 채팅방의 읽지 않은 메시지 개수를 반환
+//    @GetMapping("/unreadMessageCount/{roomId}")
+//    public ResponseEntity<Integer> getUnreadMessageCountForRoom(@PathVariable Long roomId, Principal principal) {
+//
+//        // Principal 에서 사용자 이메일을 가져옴
+//        String userEmail = principal.getName();
+//        UserEntity currentUser = userRepository.findByEmail(userEmail)
+//                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+//
+//        // 특정 채팅방에서의 읽지 않은 메시지 개수를 가져옴
+//        int unreadCount = messageRepository.countUnreadMessages(roomId, currentUser.getId());
+//
+//        return ResponseEntity.ok(unreadCount);
+//    }
 
     // 이미지 파일 업로드 후 URL 반환
     @PostMapping("/uploadImage")
