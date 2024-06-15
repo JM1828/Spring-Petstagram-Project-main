@@ -35,7 +35,6 @@ public class ChatRoomController {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
-    private final ChatRoomRepository chatRoomRepository;
 
     // 채팅방 생성
     @PostMapping("/chatRooms")
@@ -92,13 +91,13 @@ public class ChatRoomController {
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
 
         // 발신자와 수신자의 메시지 개수 업데이트 알림
-        int senderUnreadCount = updatedChatRoomListSender.stream()
-                .mapToInt(ChatRoomDTO::getUnreadMessageCount)
+        Long senderUnreadCount = updatedChatRoomListSender.stream()
+                .mapToLong(ChatRoomDTO::getUnreadMessageCount)
                 .sum();
         messagingTemplate.convertAndSend("/sub/messageCount/" + senderEmail, senderUnreadCount);
 
-        int receiverUnreadCount = updatedChatRoomListReceiver.stream()
-                .mapToInt(ChatRoomDTO::getUnreadMessageCount)
+        Long receiverUnreadCount = updatedChatRoomListReceiver.stream()
+                .mapToLong(ChatRoomDTO::getUnreadMessageCount)
                 .sum();
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
     }
@@ -111,7 +110,7 @@ public class ChatRoomController {
 
         // 읽지 않은 메시지 개수 계산 후 WebSocket 으로 전송
         String receiverEmail = principal.getName();
-        int receiverUnreadCount = chatRoomDTO.getUnreadMessageCount();
+        Long receiverUnreadCount = chatRoomDTO.getUnreadMessageCount();
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
 
         return ResponseEntity.ok(chatRoomDTO);
@@ -119,14 +118,14 @@ public class ChatRoomController {
 
     // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
     @GetMapping("/unreadMessageCount")
-    public ResponseEntity<Integer> getUnreadMessageCount(Principal principal) {
+    public ResponseEntity<Long> getUnreadMessageCount(Principal principal) {
 
         // 사용자의 모든 채팅방 목록을 가져옴
         List<ChatRoomDTO> chatRoomList = chatRoomService.getActiveChatRoomList(principal);
 
         // 읽지 않은 메시지 개수를 합산
-        int totalUnreadCount = chatRoomList.stream()
-                .mapToInt(ChatRoomDTO::getUnreadMessageCount)
+        Long totalUnreadCount = chatRoomList.stream()
+                .mapToLong(ChatRoomDTO::getUnreadMessageCount)
                 .sum();
 
         return ResponseEntity.ok(totalUnreadCount);

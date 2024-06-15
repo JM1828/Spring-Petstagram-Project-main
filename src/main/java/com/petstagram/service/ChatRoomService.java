@@ -173,7 +173,7 @@ public class ChatRoomService {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
                     // 데이터베이스에서 읽지 않은 메시지 개수 계산
-                    int unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+                    Long unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
 
                     return ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
@@ -213,22 +213,16 @@ public class ChatRoomService {
         // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
-        // 현재 사용자가 채팅방에 속해 있는지 확인
-        boolean isUserInChatRoom = (chatRoom.getSender() != null && chatRoom.getSender().getId().equals(currentUser.getId())) ||
-                (chatRoom.getReceiver() != null && chatRoom.getReceiver().getId().equals(currentUser.getId()));
-
         // 현재 사용자가 채팅방에 속해 있다면
-        if (isUserInChatRoom) {
             messages.forEach(message -> {
                 if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
                     message.setRead(true);
                     messageRepository.save(message); // 메시지 상태 갱신
                 }
             });
-        }
 
         // 사용자의 모든 읽지 않은 메시지 개수를 계산
-        int unreadMessageCount = messageRepository.countUnreadMessagesForUser(currentUser.getId());
+        Long unreadMessageCount = messageRepository.countUnreadMessagesForUser(currentUser.getId());
 
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
