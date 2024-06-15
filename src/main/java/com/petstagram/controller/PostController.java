@@ -1,6 +1,7 @@
 package com.petstagram.controller;
 
 import com.petstagram.dto.PostDTO;
+import com.petstagram.dto.UserDTO;
 import com.petstagram.service.FileUploadService;
 import com.petstagram.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -55,8 +56,19 @@ public class PostController {
 
     // 게시글 수정
     @PutMapping("/update/{postId}")
-    public ResponseEntity<PostDTO> updatePost(@PathVariable Long postId, @RequestBody PostDTO postDTO) {
-        return ResponseEntity.ok(postService.updatePost(postId, postDTO));
+    public ResponseEntity<PostDTO> updatePost(@PathVariable Long postId,
+                                              @RequestPart("post") PostDTO postDTO,
+                                              @RequestPart(value = "file", required = false) MultipartFile file,
+                                              @RequestPart(value = "breed", required = false) String breed,
+                                              @RequestPart(value = "imageUrl", required = false) String imageUrl) {
+        try {
+            postDTO.setBreed(breed);
+            PostDTO updatedPost = postService.updatePost(postId, postDTO, file, imageUrl);
+            return ResponseEntity.ok(updatedPost);
+        } catch (Exception e) {
+            log.error("게시글 수정 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // 게시글 삭제
@@ -82,5 +94,12 @@ public class PostController {
     public ResponseEntity<PostDTO> getPostLikeStatus(@PathVariable("postId") Long postId) {
         PostDTO likeStatus = postService.getPostLikeStatus(postId);
         return ResponseEntity.ok(likeStatus);
+    }
+
+    // 특정 게시물에 좋아요를 누른 사용자 리스트 조회
+    @GetMapping("/likes/{postId}")
+    public ResponseEntity<List<UserDTO>> getPostLikesList(@PathVariable Long postId) {
+        List<UserDTO> likedUsers = postService.getPostLikesList(postId);
+        return ResponseEntity.ok(likedUsers);
     }
 }

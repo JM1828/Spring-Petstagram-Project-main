@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class FollowService {
 
     private final FollowRepository followRepository;
@@ -33,7 +32,7 @@ public class FollowService {
                 throw new Exception("FOLLOW_DUPLICATED: 이미 follow 했습니다");
             } else {
                 follow.setStatus(true);
-                notificationService.sendNotification(toUser.getId(), "following", fromUser.getId(), null, null);
+                notificationService.sendNotification(toUser.getId(), "following", fromUser.getId(), null, null, null);
                 followRepository.save(follow);
 
                 return;
@@ -47,10 +46,9 @@ public class FollowService {
                 .build();
 
         followRepository.save(follow);
-        notificationService.sendNotification(toUser.getId(), "following", fromUser.getId(), null, null);
+        notificationService.sendNotification(toUser.getId(), "following", fromUser.getId(), null, null, null);
     }
 
-    @Transactional
     public void unfollow(UserEntity fromUser, UserEntity toUser) throws Exception {
         FollowEntity follow = followRepository.findFollow(fromUser, toUser)
                 .orElseThrow(() -> new Exception("FOLLOW_NOT_FOUND: 팔로우 관계가 존재하지 않습니다"));
@@ -58,30 +56,35 @@ public class FollowService {
         followRepository.delete(follow);
     }
 
+    @Transactional(readOnly = true)
     public List<UserDTO> getFollowingList(UserEntity user) {
-        List<FollowEntity> followings = followRepository.findFollowingsByUser(user);
+        List<UserEntity> followings = followRepository.findFollowingsByUser(user);
         return followings.stream()
-                .map(follow -> UserDTO.toDTO(follow.getToUser()))
+                .map(UserDTO::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<UserDTO> getFollowerList(UserEntity user) {
-        List<FollowEntity> followers = followRepository.findFollowersByUser(user);
+        List<UserEntity> followers = followRepository.findFollowersByUser(user);
         return followers.stream()
-                .map(follow -> UserDTO.toDTO(follow.getFromUser()))
+                .map(UserDTO::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public boolean isFollowing(UserEntity fromUser, UserEntity toUser) {
         return followRepository.findFollow(fromUser, toUser)
                 .map(FollowEntity::getStatus)
                 .orElse(false);
     }
 
+    @Transactional(readOnly = true)
     public int countFollowers(UserEntity user) {
         return followRepository.findFollowersByUser(user).size();
     }
 
+    @Transactional(readOnly = true)
     public int countFollowings(UserEntity user) {
         return followRepository.findFollowingsByUser(user).size();
     }

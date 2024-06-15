@@ -6,11 +6,11 @@ import com.petstagram.entity.ProfileImageEntity;
 import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.UserRepository;
 import com.petstagram.service.utils.JWTUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -160,11 +160,9 @@ public class UserService {
 
     // 회원 마이페이지
     @Transactional(readOnly = true)
-    public UserDTO getMyInfo() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        UserEntity userEntity = userRepository.findByEmailWithProfileImage(username)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. email"));
+    public UserDTO getMyInfo(String email) {
+        UserEntity userEntity = userRepository.findByEmailWithProfileImage(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. email = " + email));
         return UserDTO.toDTO(userEntity);
     }
 

@@ -18,10 +18,12 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class PostDTO {
     private Long id; // 게시물 고유 식별자
-    private String postContent; // 게시물 내용(텍스트, 이미지, 비디오 링크 등).
+    private String postContent;
     private String breed;
-    private String email; // 게시물을 작성한 사용자 email
+    private Long userId;
+    private String email;
     private String regTime;
+    private String location;
     private List<ImageDTO> imageList;
     private List<CommentDTO> commentList;
 
@@ -34,8 +36,10 @@ public class PostDTO {
                 .id(postEntity.getId())
                 .postContent(postEntity.getPostContent())
                 .breed(postEntity.getBreed())
+                .userId(postEntity.getUser().getId())
                 .email(postEntity.getUser().getEmail())
                 .regTime(postEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
+                .location(postEntity.getLocation())
                 .imageList(postEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))

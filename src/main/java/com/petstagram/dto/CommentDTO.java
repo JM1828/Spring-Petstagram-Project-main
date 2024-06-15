@@ -4,6 +4,10 @@ import com.petstagram.entity.CommentEntity;
 import com.petstagram.entity.PostEntity;
 import lombok.*;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @Builder
@@ -14,8 +18,12 @@ public class CommentDTO {
     private String commentContent; // 댓글 내용.
     private String commentEmail; // 댓글을 작성한 사용자 이메일
 
+    private String commentRegTime;
+
     private boolean commentLiked; // 댓글 좋아요 상태
     private long commentLikesCount; // 댓글의 좋아요 수.
+
+    private List<ReplyCommentDTO> replyCommentList;
 
     private Long postId;
 
@@ -25,6 +33,10 @@ public class CommentDTO {
                 .id(commentEntity.getId())
                 .commentContent(commentEntity.getCommentContent())
                 .commentEmail(commentEntity.getUser().getEmail())
+                .commentRegTime(commentEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
+                .replyCommentList(commentEntity.getReplyCommentList().stream()
+                        .map(ReplyCommentDTO::toDTO)
+                        .collect(Collectors.toList()))
                 .postId(commentEntity.getPost().getId())
                 .build();
     }

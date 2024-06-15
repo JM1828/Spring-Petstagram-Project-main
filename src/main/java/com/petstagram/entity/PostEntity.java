@@ -22,11 +22,13 @@ public class PostEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private Long id; // 게시물 고유 식별자
+    private Long id;
 
-    private String postContent; // 게시물 내용(텍스트, 이미지, 비디오 링크 등).
+    private String postContent;
 
-    private String breed; // 강아지 종류 텐서플로우로 분류
+    private String breed;
+
+    private String location;
 
     // 게시물과 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,6 +53,7 @@ public class PostEntity extends BaseEntity {
         return PostEntity.builder()
                 .postContent(dto.getPostContent())
                 .breed(dto.getBreed())
+                .location(dto.getLocation())
                 .imageList(new ArrayList<>())
                 .commentList(new ArrayList<>())
                 .build();

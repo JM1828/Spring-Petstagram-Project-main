@@ -6,7 +6,9 @@ import com.petstagram.dto.CommentDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 // 댓글
@@ -43,10 +45,32 @@ public class CommentEntity extends BaseEntity {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CommentLikeEntity> commentLikeList = new HashSet<>();
 
+    // 대댓글과의 관계 설정
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReplyCommentEntity> replyCommentList = new ArrayList<>();
+
+    // DTO -> Entity
+    public static CommentEntity toEntity(CommentDTO dto) {
+        return CommentEntity.builder()
+                .commentContent(dto.getCommentContent())
+                .build();
+    }
+
     // == 연관관계 편의 메서드 == //
     // 댓글 좋아요를 추가하는 메서드
     public void addCommentLike(CommentLikeEntity commentLikeEntity) {
         this.commentLikeList.add(commentLikeEntity);
         commentLikeEntity.setComment(this); // 댓글에 좋아요 설정
+    }
+
+    // 대댓글을 추가하는 메서드
+    public void addReplyComment(ReplyCommentEntity replyCommentEntity) {
+        this.replyCommentList.add(replyCommentEntity);
+        replyCommentEntity.setComment(this);
+    }
+
+    // 댓글 작성자의 ID를 반환하는 메서드
+    public Long getAuthorId() {
+        return this.user != null ? this.user.getId() : null;
     }
 }

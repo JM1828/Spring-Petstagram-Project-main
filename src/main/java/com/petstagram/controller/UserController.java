@@ -78,7 +78,9 @@ public class UserController {
     // 회원 마이페이지
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getMyProfile() {
-        UserDTO response = userService.getMyInfo();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserDTO response = userService.getMyInfo(email);
         return ResponseEntity.ok(response);
     }
 

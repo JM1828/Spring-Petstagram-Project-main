@@ -44,6 +44,13 @@ public class ChatRoomController {
         return ResponseEntity.ok(newChatRoom);
     }
 
+    // 채팅방 리스트 조회
+    @GetMapping("/chatRooms/list")
+    public ResponseEntity<List<ChatRoomDTO>> getChatRoomList(Principal principal) {
+        List<ChatRoomDTO> chatRoomList = chatRoomService.getChatRoomList(principal);
+        return ResponseEntity.ok(chatRoomList);
+    }
+
     // 메시지 전송
     @MessageMapping("/sendMessage/{roomId}")
     public void sendMessage(@DestinationVariable Long roomId, @RequestBody MessageDTO messageDTO, Principal principal) {
@@ -71,10 +78,6 @@ public class ChatRoomController {
             }
         }, Comparator.reverseOrder());
 
-        // 채팅방 엔티티 조회
-        ChatRoomEntity chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
-
         // 발신자와 수신자의 채팅방 리스트 업데이트
         List<ChatRoomDTO> updatedChatRoomListSender = chatRoomService.getActiveChatRoomList(principal)
                 .stream()
@@ -100,11 +103,18 @@ public class ChatRoomController {
         messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
     }
 
-    // 채팅방 리스트 조회
-    @GetMapping("/chatRooms/list")
-    public ResponseEntity<List<ChatRoomDTO>> getChatRoomList(Principal principal) {
-        List<ChatRoomDTO> chatRoomList = chatRoomService.getChatRoomList(principal);
-        return ResponseEntity.ok(chatRoomList);
+    // 채팅방 및 메시지 목록 조회 및 메시지 개수 초기화
+    @GetMapping("/chatRooms/{chatRoomId}")
+    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
+        // 채팅방 및 메시지 조회
+        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
+
+        // 읽지 않은 메시지 개수 계산 후 WebSocket 으로 전송
+        String receiverEmail = principal.getName();
+        int receiverUnreadCount = chatRoomDTO.getUnreadMessageCount();
+        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
+
+        return ResponseEntity.ok(chatRoomDTO);
     }
 
     // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
@@ -121,21 +131,6 @@ public class ChatRoomController {
 
         return ResponseEntity.ok(totalUnreadCount);
     }
-
-//    // 특정 채팅방의 읽지 않은 메시지 개수를 반환
-//    @GetMapping("/unreadMessageCount/{roomId}")
-//    public ResponseEntity<Integer> getUnreadMessageCountForRoom(@PathVariable Long roomId, Principal principal) {
-//
-//        // Principal 에서 사용자 이메일을 가져옴
-//        String userEmail = principal.getName();
-//        UserEntity currentUser = userRepository.findByEmail(userEmail)
-//                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-//
-//        // 특정 채팅방에서의 읽지 않은 메시지 개수를 가져옴
-//        int unreadCount = messageRepository.countUnreadMessages(roomId, currentUser.getId());
-//
-//        return ResponseEntity.ok(unreadCount);
-//    }
 
     // 이미지 파일 업로드 후 URL 반환
     @PostMapping("/uploadImage")
@@ -154,12 +149,5 @@ public class ChatRoomController {
             errorResponse.put("error", "Failed to upload image: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-    }
-
-    // 채팅방 및 메시지 목록 조회 및 메시지 개수 초기화
-    @GetMapping("/chatRooms/{chatRoomId}")
-    public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
-        ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
-        return ResponseEntity.ok(chatRoomDTO);
     }
 }

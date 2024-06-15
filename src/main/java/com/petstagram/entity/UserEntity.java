@@ -29,11 +29,10 @@ public class UserEntity implements UserDetails {
     private String name;
     private String password;
     private String role = "USER";
-
-    // 추가
-    private String gender; // 성별
-    private String bio; // 사용자 소개
-    private Boolean isRecommend; // 추천 여부, 기본값은 false
+    private String gender;
+    private String bio;
+    private Boolean isRecommend;
+    private String phone;
 
     // 사용자와 게시물은 일대다 관계
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -59,6 +58,10 @@ public class UserEntity implements UserDetails {
     private List<MessageEntity> sentMessages = new ArrayList<>(); // 메시지를 보낸 사용자의 식별자.
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> receivedMessages = new ArrayList<>(); // 메시지를 받은 사용자의 식별자.
+
+    // 신고 유저
+    @OneToMany(mappedBy = "reportedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BannedEntity> bans;
 
     // == 연관관계 편의 메서드 == //
     // 게시물 관련 메서드
@@ -96,6 +99,7 @@ public class UserEntity implements UserDetails {
                 .gender(userDTO.getGender())
                 .bio(userDTO.getBio())
                 .isRecommend(userDTO.getIsRecommend())
+                .phone(userDTO.getPhone())
                 .build();
 
         // ProfileImageDTO가 존재하면 ProfileImageEntity로 변환하여 설정
@@ -151,5 +155,4 @@ public class UserEntity implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }

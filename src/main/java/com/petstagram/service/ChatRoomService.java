@@ -26,7 +26,6 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final SimpMessagingTemplate messagingTemplate;
 
     // 채팅방 생성
     @Transactional
@@ -214,16 +213,22 @@ public class ChatRoomService {
         // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
-        // 메시지를 읽음으로 처리
-        messages.forEach(message -> {
-            if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
-                message.setRead(true);
-                messageRepository.save(message); // 메시지 상태 갱신
-            }
-        });
+        // 현재 사용자가 채팅방에 속해 있는지 확인
+        boolean isUserInChatRoom = (chatRoom.getSender() != null && chatRoom.getSender().getId().equals(currentUser.getId())) ||
+                (chatRoom.getReceiver() != null && chatRoom.getReceiver().getId().equals(currentUser.getId()));
 
-        // 읽지 않은 메시지 개수 계산
-//        int unreadMessageCount = messageRepository.countUnreadMessages(chatRoomId, currentUser.getId());
+        // 현재 사용자가 채팅방에 속해 있다면
+        if (isUserInChatRoom) {
+            messages.forEach(message -> {
+                if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
+                    message.setRead(true);
+                    messageRepository.save(message); // 메시지 상태 갱신
+                }
+            });
+        }
+
+        // 사용자의 모든 읽지 않은 메시지 개수를 계산
+        int unreadMessageCount = messageRepository.countUnreadMessagesForUser(currentUser.getId());
 
         // ChatRoomDTO 변환
         ChatRoomDTO chatRoomDTO = ChatRoomDTO.toDTO(chatRoom);
@@ -234,9 +239,7 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
 
         chatRoomDTO.setMessages(messageDTOs);
-
-        // 특정 채팅방에 대한 메시지 개수 업데이트 알림 전송
-//        messagingTemplate.convertAndSend("/sub/messageCount/" + currentUser.getEmail(), unreadMessageCount);
+        chatRoomDTO.setUnreadMessageCount(unreadMessageCount);
 
         return chatRoomDTO;
     }
