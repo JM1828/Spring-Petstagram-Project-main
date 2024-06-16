@@ -23,7 +23,9 @@ public class PostController {
 
     // 게시글 작성
     @PostMapping("/write")
-    public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO, @RequestPart("file") MultipartFile file, @RequestPart("breed") String breed) {
+    public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO,
+                                            @RequestPart("file") MultipartFile file,
+                                            @RequestPart(value = "breed", required = false) String breed) {
         try {
             postDTO.setBreed(breed);
             postService.writePost(postDTO, file);

@@ -25,6 +25,7 @@ public class PostDTO {
     private String regTime;
     private String location;
     private List<ImageDTO> imageList;
+    private List<VideoDTO> videoList;
     private List<CommentDTO> commentList;
 
     private boolean postLiked; // 게시물 좋아요 상태
@@ -42,6 +43,9 @@ public class PostDTO {
                 .location(postEntity.getLocation())
                 .imageList(postEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
+                        .collect(Collectors.toList()))
+                .videoList(postEntity.getVideoList().stream()
+                        .map(VideoDTO::toDTO)
                         .collect(Collectors.toList()))
                 .commentList(postEntity.getCommentList().stream()
                         .map(CommentDTO::toDTO)

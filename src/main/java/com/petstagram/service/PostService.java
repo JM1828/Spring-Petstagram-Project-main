@@ -2,10 +2,7 @@ package com.petstagram.service;
 
 import com.petstagram.dto.PostDTO;
 import com.petstagram.dto.UserDTO;
-import com.petstagram.entity.ImageEntity;
-import com.petstagram.entity.PostEntity;
-import com.petstagram.entity.PostLikeEntity;
-import com.petstagram.entity.UserEntity;
+import com.petstagram.entity.*;
 import com.petstagram.repository.NotificationRepository;
 import com.petstagram.repository.PostLikeRepository;
 import com.petstagram.repository.PostRepository;
@@ -29,7 +26,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final NotificationRepository notificationRepository;
-
     private final FileUploadService fileUploadService;
     private final NotificationService notificationService;
 
@@ -49,7 +45,6 @@ public class PostService {
         }).collect(Collectors.toList());
     }
 
-
     // 게시글 작성
     public void writePost(PostDTO dto, MultipartFile file) {
         // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
@@ -66,15 +61,25 @@ public class PostService {
         userEntity.addPost(postEntity);
         postEntity.setUser(userEntity);
 
-        // 이미지 업로드 처리
+        // 파일 업로드 처리
         if (file != null && !file.isEmpty()) {
             String fileName = fileUploadService.storeFile(file);
-            ImageEntity imageEntity = new ImageEntity();
-            imageEntity.setImageUrl(fileName);
-            imageEntity.setPost(postEntity);
-            postEntity.getImageList().add(imageEntity);
-        }
+            String contentType = file.getContentType();
 
+            if (contentType != null) {
+                if (contentType.startsWith("image/")) {
+                    ImageEntity imageEntity = new ImageEntity();
+                    imageEntity.setImageUrl(fileName);
+                    imageEntity.setPost(postEntity);
+                    postEntity.getImageList().add(imageEntity);
+                } else if (contentType.startsWith("video/")) {
+                    VideoEntity videoEntity = new VideoEntity();
+                    videoEntity.setVideoUrl(fileName);
+                    videoEntity.setPost(postEntity);
+                    postEntity.getVideoList().add(videoEntity);
+                }
+            }
+        }
         // DB에 저장
         postRepository.save(postEntity);
     }

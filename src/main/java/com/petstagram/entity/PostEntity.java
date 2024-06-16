@@ -40,6 +40,10 @@ public class PostEntity extends BaseEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageList = new ArrayList<>();
 
+    // 게시물과 동영상은 일대다 관계
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VideoEntity> videoList = new ArrayList<>();
+
     // 게시물과 댓글은 일대다 관계
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentEntity> commentList = new ArrayList<>();
@@ -55,6 +59,7 @@ public class PostEntity extends BaseEntity {
                 .breed(dto.getBreed())
                 .location(dto.getLocation())
                 .imageList(new ArrayList<>())
+                .videoList(new ArrayList<>())
                 .commentList(new ArrayList<>())
                 .build();
     }
@@ -69,6 +74,12 @@ public class PostEntity extends BaseEntity {
     public void addLike(PostLikeEntity postLikeEntity) {
         this.postLikeList.add(postLikeEntity);
         postLikeEntity.setPost(this);
+    }
+
+    // 동영상을 포스트에 추가하는 메서드
+    public void addVideo(VideoEntity videoEntity) {
+        this.videoList.add(videoEntity);
+        videoEntity.setPost(this);
     }
 
     // 작성자 아이디를 가져오는 메서드
