@@ -126,6 +126,7 @@ public class PostService {
         postEntity.setPostContent(postDTO.getPostContent());
         postEntity.setBreed(postDTO.getBreed());
 
+        // 이미지 파일 처리
         if (file != null && !file.isEmpty()) {
             String fileName = fileUploadService.storeFile(file);
             ImageEntity imageEntity = new ImageEntity();
@@ -142,6 +143,24 @@ public class PostService {
             postEntity.getImageList().clear();
             postEntity.getImageList().add(imageEntity);
         }
+
+//        // 비디오 파일 처리
+//        if (file != null && !file.isEmpty()) {
+//            String videoFileName = fileUploadService.storeFile(file);
+//            VideoEntity videoEntity = new VideoEntity();
+//            videoEntity.setVideoUrl(videoFileName);
+//            videoEntity.setPost(postEntity);
+//            postEntity.getVideoList().clear();
+//            postEntity.getVideoList().add(videoEntity);
+//        }
+//        /* 게시글 수정 시 텍스트만 변경될 때, 현재 동영상 유지를 위한 조건 */
+//        else if (videoUrl != null && !videoUrl.isEmpty()) {
+//            VideoEntity videoEntity = new VideoEntity();
+//            videoEntity.setVideoUrl(videoUrl);
+//            videoEntity.setPost(postEntity);
+//            postEntity.getVideoList().clear();
+//            postEntity.getVideoList().add(videoEntity);
+//        }
 
         postRepository.save(postEntity);
 
