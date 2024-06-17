@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/sms")
+@RequestMapping("/sms")
 public class SmsController {
     private final SmsService smsService;
 
@@ -17,7 +17,6 @@ public class SmsController {
     }
 
     public static class SmsRequest {
-        public String from;
         public String to;
     }
 
@@ -31,10 +30,11 @@ public class SmsController {
         }
     }
 
+    /* 문자 단일 메시지 전송 */
     @PostMapping("/send-one")
     public SmsResponse sendOne(@RequestBody SmsRequest smsRequest) {
         String verificationCode = smsService.generateVerificationCode();
-        SingleMessageSentResponse response = smsService.sendOne(smsRequest.from, smsRequest.to, verificationCode);
+        SingleMessageSentResponse response = smsService.sendOne(smsRequest.to, verificationCode);
         return new SmsResponse(response, verificationCode);
     }
 }

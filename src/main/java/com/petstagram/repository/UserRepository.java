@@ -15,15 +15,13 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Boolean existsByEmail(String email);
 
-//    Boolean existsByNickName(String name);
-
     Optional<UserEntity> findByEmail(String email);
 
     UserEntity findByName(String username);
 
     @Query("SELECT new com.petstagram.dto.UserProfileDTO(u.id, u.name, u.email, " +
             "new com.petstagram.dto.ProfileImageDTO(p.id, p.imageUrl, u.id), " +
-            "u.bio, u.isRecommend, u.phone) " +
+            "u.bio, u.isRecommend, u.phone, u.password) " +
             "FROM UserEntity u " +
             "LEFT JOIN u.profileImage p")
     List<UserProfileDTO> findAllUserProfiles();

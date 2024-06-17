@@ -21,6 +21,7 @@ public class UserProfileDTO {
     private Long id;
     private String name;
     private String email;
+    private String password;
     private String gender;
     private String bio;
     private String phone;
@@ -29,7 +30,7 @@ public class UserProfileDTO {
 
     private List<UserEntity> userEntityList;
 
-    public UserProfileDTO(Long id, String name, String email, ProfileImageDTO profileImage, String bio, Boolean isRecommend, String phone) {
+    public UserProfileDTO(Long id, String name, String email, ProfileImageDTO profileImage, String bio, Boolean isRecommend, String phone, String password) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -37,6 +38,7 @@ public class UserProfileDTO {
         this.bio = bio;
         this.isRecommend = isRecommend;
         this.phone = phone;
+        this.password = password;
     }
 
     // Entity -> DTO
@@ -44,6 +46,7 @@ public class UserProfileDTO {
         UserProfileDTO userProfileDTO = UserProfileDTO.builder()
                 .id(userEntity.getId())
                 .email(userEntity.getEmail())
+                .password(userEntity.getPassword())
                 .name(userEntity.getName())
                 .gender(userEntity.getGender())
                 .bio(userEntity.getBio())

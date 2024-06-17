@@ -24,11 +24,11 @@ public class PostController {
     // 게시글 작성
     @PostMapping("/write")
     public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO,
-                                            @RequestPart("file") MultipartFile file,
+                                            @RequestPart("file") List<MultipartFile> files,
                                             @RequestPart(value = "breed", required = false) String breed) {
         try {
             postDTO.setBreed(breed);
-            postService.writePost(postDTO, file);
+            postService.writePost(postDTO, files);
             return ResponseEntity.ok("게시글이 작성되었습니다.");
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);
@@ -60,13 +60,13 @@ public class PostController {
     @PutMapping("/update/{postId}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable Long postId,
                                               @RequestPart("post") PostDTO postDTO,
-                                              @RequestPart(value = "file", required = false) MultipartFile file,
+                                              @RequestPart(value = "file", required = false) List<MultipartFile> files,
                                               @RequestPart(value = "breed", required = false) String breed,
-                                              @RequestPart(value = "imageUrl", required = false) String imageUrl,
+                                              @RequestPart(value = "imageUrl", required = false) List<String> imageUrls,
                                               @RequestPart(value = "videoUrl", required = false) String videoUrl) {
         try {
             postDTO.setBreed(breed);
-            PostDTO updatedPost = postService.updatePost(postId, postDTO, file, imageUrl, videoUrl);
+            PostDTO updatedPost = postService.updatePost(postId, postDTO, files, imageUrls, videoUrl);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
             log.error("게시글 수정 중 오류 발생", e);

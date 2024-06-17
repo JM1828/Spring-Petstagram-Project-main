@@ -31,7 +31,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final FileUploadService fileUploadService;
-    private final FollowService followService;
 
     // 회원가입
     public UserDTO signup(UserDTO userDTO) {
@@ -100,33 +99,53 @@ public class UserService {
         return response;
     }
 
-    // 회원수정
-    public UserDTO updateUser(Long userId, UserDTO userDTO) {
+    // 회원 비밀번호 수정
+    public UserDTO updatePassword(Long userId, UserDTO userDTO) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
 
-        // 현재 사용자의 이메일과 수정하려는 이메일이 다르면서, 수정하려는 이메일이 이미 사용 중인지 확인
-        if (!userEntity.getEmail().equals(userDTO.getEmail()) && userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        }
-
-        userEntity.setEmail(userDTO.getEmail());
-        userEntity.setName(userDTO.getName());
-
-        // userDTO 의 비밀번호가 null 이 아니고, 비어있지 않은 경우에만 업데이트
-        // 새 비밀번호는 bCryptPasswordEncoder 를 사용하여 암호화
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
             userEntity.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         }
 
-        // 변경된 사용자 정보를 userRepository 를 통해 저장
         userRepository.save(userEntity);
 
-        // 업데이트된 사용자 엔티티를 UserDTO 로 변환하여 반환
         return UserDTO.toDTO(userEntity);
     }
 
-    // 회원 프로필 편집 ( bio, gender, image ) 추가
+    // 회원 Email 수정
+    public UserDTO updateEmail(Long userId, UserDTO userDTO) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
+
+        if (userDTO.getEmail() != null && !userEntity.getEmail().equals(userDTO.getEmail()) && userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (userDTO.getEmail() != null) {
+            userEntity.setEmail(userDTO.getEmail());
+        }
+
+        userRepository.save(userEntity);
+
+        return UserDTO.toDTO(userEntity);
+    }
+
+    // 회원 Name 수정
+    public UserDTO updateName(Long userId, UserDTO userDTO) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
+
+        if (userDTO.getName() != null) {
+            userEntity.setName(userDTO.getName());
+        }
+
+        userRepository.save(userEntity);
+
+        return UserDTO.toDTO(userEntity);
+    }
+
+    // 회원 프로필 편집 ( bio, gender, isRecommend, image )
     public UserDTO editUser(Long userId, UserDTO userDTO, MultipartFile file) {
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. ID: " + userId));
@@ -148,7 +167,7 @@ public class UserService {
             userEntity.setProfileImage(profileImageEntity);
         }
 
-        userRepository.save(userEntity); // 변경 사항을 저장
+        userRepository.save(userEntity);
 
         return UserDTO.toDTO(userEntity);
     }
@@ -172,14 +191,6 @@ public class UserService {
         return userRepository.findAllUserProfiles();
     }
 
-    @Transactional(readOnly = true)
-    public UserDTO getUsersById(Long userId) {
-        UserDTO userDTO = new UserDTO();
-        UserEntity usersById = userRepository.findByIdWithProfileImage(userId).orElseThrow(() -> new RuntimeException("User Not found"));
-        userDTO.setUserEntity(usersById);
-        return userDTO;
-    }
-
     // 팔로우 UserId 찾기
     @Transactional(readOnly = true)
     public UserEntity getUserByEmail(String email) {
@@ -191,19 +202,5 @@ public class UserService {
     public UserEntity getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND: 사용자를 찾을 수 없습니다. ID: " + userId));
-    }
-
-    // 팔로워 갯수 증가 메소드 추가
-    public int getFollowersCount(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
-        return followService.countFollowers(user);
-    }
-
-    // 팔로잉 갯수 증가 메소드 추가
-    public int getFollowingsCount(Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
-        return followService.countFollowings(user);
     }
 }

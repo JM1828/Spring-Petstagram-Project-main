@@ -8,13 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class FileUploadService {
     private final Path fileLocation;
 
-    public FileUploadService(@Value("${file.upload-dir}") String uploadDir)  {
+    public FileUploadService(@Value("${file.upload-dir}") String uploadDir) {
         this.fileLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
 
         try {
@@ -27,8 +29,8 @@ public class FileUploadService {
     public String storeFile(MultipartFile file) {
         String fileName = UUID.randomUUID().toString() + "." + file.getOriginalFilename();
 
-        try{
-            if(fileName.contains("..")) {
+        try {
+            if (fileName.contains("..")) {
                 throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
             }
 

@@ -17,10 +17,13 @@ public class SmsService {
     private static final Logger logger = LoggerFactory.getLogger(SmsService.class);
 
     final DefaultMessageService messageService;
+    private final String from;
 
     public SmsService(@Value("${coolsms.api.key}") String apiKey,
-                      @Value("${coolsms.api.secret}") String apiSecret) {
+                      @Value("${coolsms.api.secret}") String apiSecret,
+                      @Value("${coolsms.from}") String from) {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
+        this.from = from;
     }
 
     public String generateVerificationCode() {
@@ -29,11 +32,11 @@ public class SmsService {
         return String.valueOf(code);
     }
 
-    public SingleMessageSentResponse sendOne(String from, String to, String verificationCode) {
+    public SingleMessageSentResponse sendOne(String to, String verificationCode) {
         String text = "[Pestagram] 인증 코드 : [" + verificationCode + "]";
 
         Message message = new Message();
-        message.setFrom(from);
+        message.setFrom(this.from);
         message.setTo(to);
         message.setText(text);
 
