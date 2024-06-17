@@ -62,10 +62,11 @@ public class PostController {
                                               @RequestPart("post") PostDTO postDTO,
                                               @RequestPart(value = "file", required = false) MultipartFile file,
                                               @RequestPart(value = "breed", required = false) String breed,
-                                              @RequestPart(value = "imageUrl", required = false) String imageUrl) {
+                                              @RequestPart(value = "imageUrl", required = false) String imageUrl,
+                                              @RequestPart(value = "videoUrl", required = false) String videoUrl) {
         try {
             postDTO.setBreed(breed);
-            PostDTO updatedPost = postService.updatePost(postId, postDTO, file, imageUrl);
+            PostDTO updatedPost = postService.updatePost(postId, postDTO, file, imageUrl, videoUrl);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
             log.error("게시글 수정 중 오류 발생", e);

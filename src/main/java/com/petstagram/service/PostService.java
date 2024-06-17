@@ -114,7 +114,7 @@ public class PostService {
     }
 
     // 게시글 수정
-    public PostDTO updatePost(Long postId, PostDTO postDTO, MultipartFile file, String imageUrl) {
+    public PostDTO updatePost(Long postId, PostDTO postDTO, MultipartFile file, String imageUrl, String videoUrl) {
         PostEntity postEntity = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 게시물을 찾을 수 없습니다. ID: " + postId));
 
@@ -126,41 +126,44 @@ public class PostService {
         postEntity.setPostContent(postDTO.getPostContent());
         postEntity.setBreed(postDTO.getBreed());
 
-        // 이미지 파일 처리
+        // 파일 업로드 처리
         if (file != null && !file.isEmpty()) {
             String fileName = fileUploadService.storeFile(file);
-            ImageEntity imageEntity = new ImageEntity();
-            imageEntity.setImageUrl(fileName);
-            imageEntity.setPost(postEntity);
-            postEntity.getImageList().clear();
-            postEntity.getImageList().add(imageEntity);
-        }
-        /* 게시글 수정 시 텍스트만 변경될 때, 현재 이미지 유지를 위한 조건 */
-        else if (imageUrl != null && !imageUrl.isEmpty()) {
-            ImageEntity imageEntity = new ImageEntity();
-            imageEntity.setImageUrl(imageUrl);
-            imageEntity.setPost(postEntity);
-            postEntity.getImageList().clear();
-            postEntity.getImageList().add(imageEntity);
-        }
+            String contentType = file.getContentType();
 
-//        // 비디오 파일 처리
-//        if (file != null && !file.isEmpty()) {
-//            String videoFileName = fileUploadService.storeFile(file);
-//            VideoEntity videoEntity = new VideoEntity();
-//            videoEntity.setVideoUrl(videoFileName);
-//            videoEntity.setPost(postEntity);
-//            postEntity.getVideoList().clear();
-//            postEntity.getVideoList().add(videoEntity);
-//        }
-//        /* 게시글 수정 시 텍스트만 변경될 때, 현재 동영상 유지를 위한 조건 */
-//        else if (videoUrl != null && !videoUrl.isEmpty()) {
-//            VideoEntity videoEntity = new VideoEntity();
-//            videoEntity.setVideoUrl(videoUrl);
-//            videoEntity.setPost(postEntity);
-//            postEntity.getVideoList().clear();
-//            postEntity.getVideoList().add(videoEntity);
-//        }
+            if (contentType != null) {
+                if (contentType.startsWith("image/")) {
+                    ImageEntity imageEntity = new ImageEntity();
+                    imageEntity.setImageUrl(fileName);
+                    imageEntity.setPost(postEntity);
+                    postEntity.getImageList().clear();
+                    postEntity.getImageList().add(imageEntity);
+                } else if (contentType.startsWith("video/")) {
+                    VideoEntity videoEntity = new VideoEntity();
+                    videoEntity.setVideoUrl(fileName);
+                    videoEntity.setPost(postEntity);
+                    postEntity.getVideoList().clear();
+                    postEntity.getVideoList().add(videoEntity);
+                }
+            }
+        } else {
+            // 이미지 파일 유지 처리
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                ImageEntity imageEntity = new ImageEntity();
+                imageEntity.setImageUrl(imageUrl);
+                imageEntity.setPost(postEntity);
+                postEntity.getImageList().clear();
+                postEntity.getImageList().add(imageEntity);
+            }
+            // 비디오 파일 유지 처리
+            if (videoUrl != null && !videoUrl.isEmpty()) {
+                VideoEntity videoEntity = new VideoEntity();
+                videoEntity.setVideoUrl(videoUrl);
+                videoEntity.setPost(postEntity);
+                postEntity.getVideoList().clear();
+                postEntity.getVideoList().add(videoEntity);
+            }
+        }
 
         postRepository.save(postEntity);
 
