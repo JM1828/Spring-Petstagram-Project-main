@@ -38,8 +38,13 @@ public class ChatRoomController {
 
     // 채팅방 생성
     @PostMapping("/chatRooms")
-    public ResponseEntity<ChatRoomDTO> createChatRoom(@RequestBody ChatRoomDTO chatRoomDTO) {
+    public ResponseEntity<ChatRoomDTO> createChatRoom(@RequestBody ChatRoomDTO chatRoomDTO, Principal principal) {
+        // 새로운 채팅방 생성
         ChatRoomDTO newChatRoom = chatRoomService.createChatRoom(chatRoomDTO);
+
+        // 발신자를 생성한 채팅방에 입장시키기
+        chatRoomService.setUserActiveRoom(principal.getName(), newChatRoom.getId());
+
         return ResponseEntity.ok(newChatRoom);
     }
 
@@ -90,23 +95,39 @@ public class ChatRoomController {
                 .collect(Collectors.toList());
         messagingTemplate.convertAndSend("/sub/chatRoomList/" + receiverEmail, updatedChatRoomListReceiver);
 
-        // 발신자와 수신자의 메시지 개수 업데이트 알림
-        Long senderUnreadCount = updatedChatRoomListSender.stream()
-                .mapToLong(ChatRoomDTO::getUnreadMessageCount)
-                .sum();
-        messagingTemplate.convertAndSend("/sub/messageCount/" + senderEmail, senderUnreadCount);
+        // 발신자와 수신자가 해당 채팅방에 있는지 확인
+        Long senderActiveRoomId = chatRoomService.getUserActiveRoom(senderEmail);
+        Long receiverActiveRoomId = chatRoomService.getUserActiveRoom(receiverEmail);
 
-        Long receiverUnreadCount = updatedChatRoomListReceiver.stream()
-                .mapToLong(ChatRoomDTO::getUnreadMessageCount)
-                .sum();
-        messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
+        // 발신자가 채팅방에 있는 경우, 메시지를 읽음 처리
+        if (senderActiveRoomId != null && senderActiveRoomId.equals(roomId)) {
+            chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, principal);
+        } else {
+            Long senderUnreadCount = updatedChatRoomListSender.stream()
+                    .mapToLong(ChatRoomDTO::getUnreadMessageCount)
+                    .sum();
+            messagingTemplate.convertAndSend("/sub/messageCount/" + senderEmail, senderUnreadCount);
+        }
+
+        // 수신자가 채팅방에 있는 경우, 메시지를 읽음 처리
+        if (receiverActiveRoomId != null && receiverActiveRoomId.equals(roomId)) {
+            chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, () -> receiverEmail);
+        } else {
+            Long receiverUnreadCount = updatedChatRoomListReceiver.stream()
+                    .mapToLong(ChatRoomDTO::getUnreadMessageCount)
+                    .sum();
+            messagingTemplate.convertAndSend("/sub/messageCount/" + receiverEmail, receiverUnreadCount);
+        }
     }
 
-    // 채팅방 및 메시지 목록 조회 및 메시지 개수 초기화
+    // 채팅방 입장 및 메시지 목록 조회, 메시지 개수 초기화
     @GetMapping("/chatRooms/{chatRoomId}")
     public ResponseEntity<ChatRoomDTO> getChatRoomWithMessagesById(@PathVariable Long chatRoomId, Principal principal) {
         // 채팅방 및 메시지 조회
         ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(chatRoomId, principal);
+
+        // 사용자가 해당 채팅방에 들어가 있음을 기록
+        chatRoomService.setUserActiveRoom(principal.getName(), chatRoomId);
 
         // 읽지 않은 메시지 개수 계산 후 WebSocket 으로 전송
         String receiverEmail = principal.getName();
@@ -115,6 +136,12 @@ public class ChatRoomController {
 
         return ResponseEntity.ok(chatRoomDTO);
     }
+
+    // 채팅방 퇴장
+//    @MessageMapping("/leaveRoom/{roomId}")
+//    public void leaveRoom(@DestinationVariable Long roomId, Principal principal) {
+//        chatRoomService.removeUserActiveRoom(principal.getName());
+//    }
 
     // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
     @GetMapping("/unreadMessageCount")

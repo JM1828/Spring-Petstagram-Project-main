@@ -15,6 +15,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,9 +25,23 @@ import java.util.stream.Stream;
 @Transactional(readOnly = true)
 public class ChatRoomService {
 
+    private final ConcurrentMap<String, Long> activeUserRooms = new ConcurrentHashMap<>();
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+
+    public void setUserActiveRoom(String email, Long roomId) {
+        activeUserRooms.put(email, roomId);
+    }
+
+//    public void removeUserActiveRoom(String email) {
+//        userRepository.findByEmail(email);
+//        activeUserRooms.remove(email);
+//    }
+
+    public Long getUserActiveRoom(String email) {
+        return activeUserRooms.get(email);
+    }
 
     // 채팅방 생성
     @Transactional
