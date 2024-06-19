@@ -34,10 +34,9 @@ public class ChatRoomService {
         activeUserRooms.put(email, roomId);
     }
 
-//    public void removeUserActiveRoom(String email) {
-//        userRepository.findByEmail(email);
-//        activeUserRooms.remove(email);
-//    }
+    public void removeUserActiveRoom(String email) {
+        activeUserRooms.remove(email);
+    }
 
     public Long getUserActiveRoom(String email) {
         return activeUserRooms.get(email);

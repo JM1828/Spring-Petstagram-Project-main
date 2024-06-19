@@ -138,10 +138,10 @@ public class ChatRoomController {
     }
 
     // 채팅방 퇴장
-//    @MessageMapping("/leaveRoom/{roomId}")
-//    public void leaveRoom(@DestinationVariable Long roomId, Principal principal) {
-//        chatRoomService.removeUserActiveRoom(principal.getName());
-//    }
+    @MessageMapping("/leaveRoom/{roomId}")
+    public void leaveRoom(@DestinationVariable Long roomId, Principal principal) {
+        chatRoomService.removeUserActiveRoom(principal.getName());
+    }
 
     // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
     @GetMapping("/unreadMessageCount")

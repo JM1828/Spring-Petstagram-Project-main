@@ -180,7 +180,7 @@ public class UserService {
     // 회원 마이페이지
     @Transactional(readOnly = true)
     public UserDTO getMyInfo(String email) {
-        UserEntity userEntity = userRepository.findByEmailWithProfileImage(email)
+        UserEntity userEntity = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. email = " + email));
         return UserDTO.toDTO(userEntity);
     }

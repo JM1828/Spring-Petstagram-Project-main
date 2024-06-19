@@ -32,8 +32,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
     // 특정 채팅방 ID에 해당하는 채팅방과 관련된 메시지를 패치 조인을 통해 한 번에 로드
     @Query("SELECT cr " +
             "FROM ChatRoomEntity cr " +
-            "JOIN FETCH cr.messages m " +
+            "LEFT JOIN FETCH cr.messages " +
             "WHERE cr.id = :chatRoomId")
     Optional<ChatRoomEntity> findChatRoomWithMessagesById(@Param("chatRoomId") Long chatRoomId);
-
 }
