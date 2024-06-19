@@ -98,17 +98,17 @@ public class ChatRoomService {
         messageEntity.setRegTime(LocalDateTime.now());
 
         // 이미지 URL 을 저장
-        if (messageDTO.getImageUrl() != null && !messageDTO.getImageUrl().isEmpty()) {
-            try {
-                ImageEntity imageEntity = new ImageEntity();
-                imageEntity.setImageUrl(messageDTO.getImageUrl());
-                imageEntity.setMessage(messageEntity);
+        if (messageDTO.getImageUrls() != null && !messageDTO.getImageUrls().isEmpty()) {
+            for (String imageUrl : messageDTO.getImageUrls()) {
+                try {
+                    ImageEntity imageEntity = new ImageEntity();
+                    imageEntity.setImageUrl(imageUrl);
+                    imageEntity.setMessage(messageEntity);
 
-                List<ImageEntity> imageList = messageEntity.getImageList();
-                imageList.add(imageEntity);
-                messageEntity.setImageList(imageList);
-            } catch (Exception e) {
-                throw new RuntimeException("이미지 저장에 실패했습니다.", e);
+                    messageEntity.getImageList().add(imageEntity);
+                } catch (Exception e) {
+                    throw new RuntimeException("이미지 저장에 실패했습니다.", e);
+                }
             }
         }
 

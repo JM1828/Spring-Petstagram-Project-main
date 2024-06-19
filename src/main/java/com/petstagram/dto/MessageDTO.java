@@ -27,7 +27,7 @@ public class MessageDTO {
     private String receiverEmail; // 메시지를 받은 사용자 이름
     private String regTime;
     private List<ImageDTO> imageList;
-    private String imageUrl;
+    private List<String> imageUrls;
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {
