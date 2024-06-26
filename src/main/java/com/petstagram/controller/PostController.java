@@ -74,6 +74,7 @@ public class PostController {
         }
     }
 
+
     // 게시글 삭제
     @DeleteMapping("/delete/{postId}")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {

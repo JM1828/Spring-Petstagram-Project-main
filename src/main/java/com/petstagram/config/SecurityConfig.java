@@ -33,7 +33,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**","/user/**", "/post/**", "/comment/**","/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**").permitAll()
+                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**", "/user/**", "/post/**", "/comment/**", "/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**").permitAll()
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "USER")
                             .requestMatchers("/adminuser/**").hasAnyAuthority("ADMIN", "USER")
                             .anyRequest().authenticated();
@@ -41,11 +41,6 @@ public class SecurityConfig {
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // OAuth2 로그인 설정 추가
-//        httpSecurity.oauth2Login(oauth2 -> oauth2
-//                .userInfoEndpoint(userInfoEndpointConfig ->
-//                        userInfoEndpointConfig.userService(customOAuth2UserService)));
 
         return httpSecurity.build();
     }

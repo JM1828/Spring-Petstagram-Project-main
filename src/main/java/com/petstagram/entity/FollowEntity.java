@@ -28,10 +28,6 @@ public class FollowEntity {
     @JoinColumn(name = "to_user")
     private UserEntity toUser;
 
-//    @CreationTimestamp
-//    @Column(name = "create_date")
-//    private Timestamp createDate;
-
     @Column(name = "follow_status")
     private Boolean status;
 }

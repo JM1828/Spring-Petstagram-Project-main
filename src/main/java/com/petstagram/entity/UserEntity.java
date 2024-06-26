@@ -88,6 +88,7 @@ public class UserEntity implements UserDetails {
         chatRoom.setReceiver(this);
     }
 
+
     // DTO -> Entity
     public static UserEntity toEntity(UserDTO userDTO, BCryptPasswordEncoder bCryptPasswordEncoder) {
         UserEntity userEntity = UserEntity.builder()

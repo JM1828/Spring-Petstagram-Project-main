@@ -1,6 +1,7 @@
 package com.petstagram.repository;
 
 import com.petstagram.entity.MessageEntity;
+import com.petstagram.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

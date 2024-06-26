@@ -2,7 +2,6 @@ package com.petstagram.repository;
 
 import com.petstagram.dto.ProfileImageDTO;
 import com.petstagram.dto.UserProfileDTO;
-import com.petstagram.entity.ProfileImageEntity;
 import com.petstagram.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +24,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "FROM UserEntity u " +
             "LEFT JOIN u.profileImage p")
     List<UserProfileDTO> findAllUserProfiles();
+
 
     @Query("SELECT new com.petstagram.dto.ProfileImageDTO(pi.id, pi.imageUrl, u.id) " +
             "FROM UserEntity u JOIN u.profileImage pi WHERE u.id = :userId")

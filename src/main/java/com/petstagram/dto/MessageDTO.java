@@ -1,10 +1,8 @@
 package com.petstagram.dto;
 
-import com.petstagram.entity.ChatRoomEntity;
 import com.petstagram.entity.MessageEntity;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,13 +19,16 @@ public class MessageDTO {
     private String messageContent; // 메시지 내용
     private Long senderId; // 메시지를 보낸 사용자 ID
     private String senderName;  // 메시지를 보낸 사용자 이름
-    private String senderEmail;  // 메시지를 보낸 사용자 이름
+    private String senderEmail;  // 메시지를 보낸 사용자 이메일
     private Long receiverId; // 메시지를 받은 사용자 ID
     private String receiverName; // 메시지를 받은 사용자 이름
-    private String receiverEmail; // 메시지를 받은 사용자 이름
+    private String receiverEmail; // 메시지를 받은 사용자 이메일
     private String regTime;
     private List<ImageDTO> imageList;
     private List<String> imageUrls;
+    private String audioUrl;
+    private List<VideoDTO> videoList; // 비디오 리스트
+    private List<String> videoUrls;   // 비디오 URL 리스트
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {
@@ -45,6 +46,16 @@ public class MessageDTO {
                 .imageList(messageEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))
+                .imageUrls(messageEntity.getImageList().stream()
+                        .map(image -> image.getImageUrl())
+                        .collect(Collectors.toList()))
+                .audioUrl(messageEntity.getAudioUrl()) // 음성 메시지 URL 설정
+                .videoList(messageEntity.getVideoList().stream()
+                        .map(VideoDTO::toDTO)
+                        .collect(Collectors.toList())) // 비디오 리스트 설정
+                .videoUrls(messageEntity.getVideoList().stream()
+                        .map(video -> video.getVideoUrl())
+                        .collect(Collectors.toList())) // 비디오 URL 리스트 설정
                 .build();
     }
 }

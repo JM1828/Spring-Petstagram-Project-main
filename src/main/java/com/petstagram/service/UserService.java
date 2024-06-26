@@ -6,9 +6,7 @@ import com.petstagram.entity.ProfileImageEntity;
 import com.petstagram.entity.UserEntity;
 import com.petstagram.repository.UserRepository;
 import com.petstagram.service.utils.JWTUtils;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,51 +30,6 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final FileUploadService fileUploadService;
 
-    // 회원가입
-    public UserDTO signup(UserDTO userDTO) {
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        }
-
-        // UserDTO 를 UserEntity 로 변환
-        UserEntity userEntity = UserEntity.toEntity(userDTO, bCryptPasswordEncoder);
-
-        // 사용자 등록
-        UserEntity user = userRepository.save(userEntity);
-
-        // 저장된 사용자 정보를 다시 DTO 로 변환하여 반환
-        return UserDTO.toDTO(user);
-    }
-
-    // 로그인
-    public UserDTO login(UserDTO userDTO) {
-
-        // 전달 받은 이메일과 비밀번호를 인증 처리
-        authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(userDTO.getEmail(),
-                        userDTO.getPassword()));
-
-        // 이메일로 사용자 조회 없으면 예외 발생
-        UserEntity user = userRepository.findByEmail(userDTO.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. 이메일: " + userDTO.getEmail()));
-
-
-        // 조회된 사용자 정보를 바탕으로 JWT 토큰 생성
-        String jwt = jwtUtils.generateToken(user);
-
-        // 비어있는 맵과 사용자 정보를 바탕으로 새로고침 토큰 생성
-        String refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), user);
-
-        // 응답 객체에 토큰, 사용자 역할, 새로고침 토큰 설정
-        UserDTO response = UserDTO.toDTO(user);
-        response.setToken(jwt);
-        response.setRole(user.getRole());
-        response.setRefreshToken(refreshToken);
-
-        // 설정된 응답 객체 반환
-        return response;
-    }
-
     // 새로고침 토큰
     public UserDTO refreshToken(UserDTO userDTO) {
         UserDTO response = new UserDTO();
@@ -96,6 +49,43 @@ public class UserService {
         }
 
         // 설정된 응답 객체 반환
+        return response;
+    }
+
+    // 회원가입
+    public UserDTO signup(UserDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        UserEntity userEntity = UserEntity.toEntity(userDTO, bCryptPasswordEncoder);
+        UserEntity user = userRepository.save(userEntity);
+
+        return UserDTO.toDTO(user);
+    }
+
+    // 로그인
+    public UserDTO login(UserDTO userDTO) {
+
+        authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(userDTO.getEmail(),
+                        userDTO.getPassword()));
+
+        UserEntity user = userRepository.findByEmail(userDTO.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. 이메일: " + userDTO.getEmail()));
+
+
+        // 조회된 사용자 정보를 바탕으로 JWT 토큰 생성
+        String jwt = jwtUtils.generateToken(user);
+
+        // 비어있는 맵과 사용자 정보를 바탕으로 새로고침 토큰 생성
+        String refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), user);
+
+        UserDTO response = UserDTO.toDTO(user);
+        response.setToken(jwt);
+        response.setRole(user.getRole());
+        response.setRefreshToken(refreshToken);
+
         return response;
     }
 
@@ -177,7 +167,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    // 회원 마이페이지
+    // 회원 정보
     @Transactional(readOnly = true)
     public UserDTO getMyInfo(String email) {
         UserEntity userEntity = userRepository.findByEmail(email)
@@ -185,19 +175,20 @@ public class UserService {
         return UserDTO.toDTO(userEntity);
     }
 
-    // 모든 회원의 id, email, name, image 정보
+    // 모든 회원 정보
     @Transactional(readOnly = true)
     public List<UserProfileDTO> getAllUserProfiles() {
         return userRepository.findAllUserProfiles();
     }
 
-    // 팔로우 UserId 찾기
+    // email로 사용자 찾기
     @Transactional(readOnly = true)
     public UserEntity getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND: 사용자를 찾을 수 없습니다. 이메일: " + email));
     }
 
+    // id로 사용자 찾기
     @Transactional(readOnly = true)
     public UserEntity getUserById(Long userId) {
         return userRepository.findById(userId)

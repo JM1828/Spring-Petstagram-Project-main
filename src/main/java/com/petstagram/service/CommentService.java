@@ -61,7 +61,7 @@ public class CommentService {
     // 댓글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentList(Long postId) {
-        List<CommentEntity> commentList = commentRepository.findByPostIdWithUser(postId);
+        List<CommentEntity> commentList = commentRepository.findByPostId(postId);
         return commentList.stream().map(commentEntity -> {
             CommentDTO commentDTO = CommentDTO.toDTO(commentEntity);
 
@@ -94,7 +94,6 @@ public class CommentService {
         return CommentDTO.toDTO(commentEntity);
     }
 
-    // 댓글 삭제
     public void deleteComment(Long commentId) {
         // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -128,6 +127,7 @@ public class CommentService {
 
 
     // 댓글 좋아요 추가 또는 삭제
+    @Transactional
     public void toggleCommentLike(Long commentId) {
 
         // 댓글 찾기
@@ -165,7 +165,6 @@ public class CommentService {
     }
 
     // 댓글 좋아요 상태 조회
-    @Transactional(readOnly = true)
     public CommentDTO getCommentLikeStatus(Long commentId) {
         CommentEntity comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
@@ -292,7 +291,6 @@ public class CommentService {
     }
 
     // 대댓글 좋아요 상태 조회
-    @Transactional(readOnly = true)
     public ReplyCommentDTO getReplyCommentLikeStatus(Long replyCommentId) {
         ReplyCommentEntity replyComment = replyCommentRepository.findById(replyCommentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 대댓글이 존재하지 않습니다."));

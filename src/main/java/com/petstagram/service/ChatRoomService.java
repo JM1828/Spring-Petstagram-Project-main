@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 @Transactional(readOnly = true)
 public class ChatRoomService {
 
+    private final SimpMessagingTemplate messagingTemplate;
     private final ConcurrentMap<String, Long> activeUserRooms = new ConcurrentHashMap<>();
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -92,6 +93,7 @@ public class ChatRoomService {
         MessageEntity messageEntity = new MessageEntity();
         messageEntity.setMessageContent(messageDTO.getMessageContent());
         messageEntity.setImageList(new ArrayList<>());
+        messageEntity.setVideoList(new ArrayList<>());
         messageEntity.setChatRoom(chatRoom);
         messageEntity.setSender(sender);
         messageEntity.setReceiver(receiver);
@@ -112,6 +114,21 @@ public class ChatRoomService {
             }
         }
 
+        // 동영상 URL 을 저장
+        if (messageDTO.getVideoUrls() != null && !messageDTO.getVideoUrls().isEmpty()) {
+            for (String videoUrl : messageDTO.getVideoUrls()) {
+                try {
+                    VideoEntity videoEntity = new VideoEntity();
+                    videoEntity.setVideoUrl(videoUrl);
+                    videoEntity.setMessage(messageEntity);
+
+                    messageEntity.getVideoList().add(videoEntity);
+                } catch (Exception e) {
+                    throw new RuntimeException("동영상 저장에 실패했습니다.", e);
+                }
+            }
+        }
+
         // 연관관계 편의 메서드 설정
         chatRoom.addMessage(messageEntity);
 
@@ -121,7 +138,40 @@ public class ChatRoomService {
         return MessageDTO.toDTO(savedMessage);
     }
 
-    // 채팅방 리스트 조회
+    @Transactional
+    public MessageDTO sendAudioMessage(MessageDTO messageDTO, Principal principal) {
+
+        String name = principal.getName();
+        UserEntity sender = userRepository.findByEmail(name)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 받는 사람 찾기
+        UserEntity receiver = userRepository.findById(messageDTO.getReceiverId())
+                .orElseThrow(() -> new IllegalArgumentException("수신자가 존재하지 않습니다."));
+
+        // 채팅방 찾기
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(messageDTO.getChatRoomId())
+                .orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
+
+        // DTO 를 Entity 로 변환하고 사용자 정보 설정
+        MessageEntity messageEntity = new MessageEntity();
+        messageEntity.setAudioUrl(messageDTO.getAudioUrl());  // 음성 메시지 URL 설정
+        messageEntity.setChatRoom(chatRoom);
+        messageEntity.setSender(sender);
+        messageEntity.setReceiver(receiver);
+        messageEntity.setRegTime(LocalDateTime.now());
+
+        // 연관관계 편의 메서드 설정
+        chatRoom.addMessage(messageEntity);
+
+        // 메시지 저장
+        MessageEntity savedMessage = messageRepository.save(messageEntity);
+
+        return MessageDTO.toDTO(savedMessage);
+    }
+
+    // 채팅방 리스트 조회 및 읽지 않은 메시지의 상태값 변경
+    @Transactional
     public List<ChatRoomDTO> getChatRoomList(Principal principal) {
 
         String name = principal.getName();
@@ -139,8 +189,8 @@ public class ChatRoomService {
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
-                    // 읽지 않은 메시지를 확인하여 • 표시 추가
-//                    boolean hasUnreadMessage = messageRepository.existsByChatRoomIdAndReceiverAndIsReadFalse(chatRoomEntity.getId(), currentUser);
+                    // 데이터베이스에서 읽지 않은 메시지 개수 계산
+                    Long unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
 
                     return ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
@@ -149,7 +199,7 @@ public class ChatRoomService {
                             .senderName(chatRoomEntity.getSender().getName())
                             .receiverId(chatRoomEntity.getReceiver().getId())
                             .receiverName(chatRoomEntity.getReceiver().getName())
-//                            .hasUnreadMessage(hasUnreadMessage)
+                            .unreadMessageCount(unreadMessageCount)
                             .build();
                 })
                 .sorted(Comparator.comparing(chatRoom -> {
@@ -229,12 +279,13 @@ public class ChatRoomService {
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
         // 현재 사용자가 채팅방에 속해 있다면
-            messages.forEach(message -> {
-                if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
-                    message.setRead(true);
-                    messageRepository.save(message); // 메시지 상태 갱신
-                }
-            });
+        messages.forEach(message -> {
+            if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
+                message.setRead(true);
+                message.setDelivered(true);
+                messageRepository.save(message); // 메시지 상태 갱신
+            }
+        });
 
         // 사용자의 모든 읽지 않은 메시지 개수를 계산
         Long unreadMessageCount = messageRepository.countUnreadMessagesForUser(currentUser.getId());
@@ -249,6 +300,12 @@ public class ChatRoomService {
 
         chatRoomDTO.setMessages(messageDTOs);
         chatRoomDTO.setUnreadMessageCount(unreadMessageCount);
+
+        // 체팅방 리스트 조회
+        List<ChatRoomDTO> updatedChatRoomList = getActiveChatRoomList(principal);
+
+        messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), unreadMessageCount);
+        messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), updatedChatRoomList);
 
         return chatRoomDTO;
     }
