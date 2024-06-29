@@ -22,6 +22,8 @@ public class StoryEntity {
 
     private String storyImage;
 
+    private String storyType;
+
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StoryReadEntity> reads = new HashSet<>();
 
