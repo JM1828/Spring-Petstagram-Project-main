@@ -28,8 +28,6 @@ public class MessageEntity extends BaseEntity{
 
     private boolean isRead = false;
 
-    private boolean isDelivered = false;
-
     // 메시지와 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY 는 지연 로딩을 의미
     @JoinColumn(name = "senderUser_id")
