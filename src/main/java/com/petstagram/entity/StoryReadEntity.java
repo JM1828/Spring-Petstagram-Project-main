@@ -19,6 +19,5 @@ public class StoryReadEntity {
     @JoinColumn(name = "story_id", nullable = false)
     private StoryEntity story;
 
-    @Column(name = "user_id", nullable = false)
     private Long userId;
 }
