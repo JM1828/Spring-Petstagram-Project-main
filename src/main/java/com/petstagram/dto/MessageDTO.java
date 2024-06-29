@@ -29,6 +29,7 @@ public class MessageDTO {
     private String audioUrl;
     private List<VideoDTO> videoList; // 비디오 리스트
     private List<String> videoUrls;   // 비디오 URL 리스트
+    private boolean isDelivered = false;
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {
@@ -56,6 +57,7 @@ public class MessageDTO {
                 .videoUrls(messageEntity.getVideoList().stream()
                         .map(video -> video.getVideoUrl())
                         .collect(Collectors.toList())) // 비디오 URL 리스트 설정
+                .isDelivered(messageEntity.isDelivered())
                 .build();
     }
 }

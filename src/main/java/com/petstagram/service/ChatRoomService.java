@@ -189,8 +189,16 @@ public class ChatRoomService {
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
-                    // 데이터베이스에서 읽지 않은 메시지 개수 계산
-                    Long unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+                    // 현재 활성 채팅방 ID를 가져옴
+                    Long activeRoomId = getUserActiveRoom(name);
+
+                    // 읽지 않은 메시지 개수 계산
+                    Long unreadMessageCount;
+                    if (activeRoomId != null && activeRoomId.equals(chatRoomEntity.getId())) {
+                        unreadMessageCount = 0L; // 활성 채팅방인 경우 읽지 않은 메시지 개수는 0
+                    } else {
+                        unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+                    }
 
                     return ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
@@ -237,8 +245,16 @@ public class ChatRoomService {
                 .map(chatRoomEntity -> {
                     List<MessageEntity> recentMessages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomEntity.getId());
 
-                    // 데이터베이스에서 읽지 않은 메시지 개수 계산
-                    Long unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+                    // 현재 활성 채팅방 ID를 가져옴
+                    Long activeRoomId = getUserActiveRoom(name);
+
+                    // 읽지 않은 메시지 개수 계산
+                    Long unreadMessageCount;
+                    if (activeRoomId != null && activeRoomId.equals(chatRoomEntity.getId())) {
+                        unreadMessageCount = 0L; // 활성 채팅방인 경우 읽지 않은 메시지 개수는 0
+                    } else {
+                        unreadMessageCount = messageRepository.countUnreadMessages(chatRoomEntity.getId(), currentUser.getId());
+                    }
 
                     return ChatRoomDTO.builder()
                             .id(chatRoomEntity.getId())
@@ -282,7 +298,6 @@ public class ChatRoomService {
         messages.forEach(message -> {
             if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
                 message.setRead(true);
-                message.setDelivered(true);
                 messageRepository.save(message); // 메시지 상태 갱신
             }
         });
