@@ -294,13 +294,17 @@ public class ChatRoomService {
         // 채팅방에 속한 가장 최근 메시지 목록 조회 (내림차순으로 정렬)
         List<MessageEntity> messages = chatRoomRepository.findRecentMessagesByChatRoomId(chatRoomId);
 
+        // 새로운 메시지가 있는지 여부를 추적
+        boolean hasNewMessages = false;
+
         // 현재 사용자가 채팅방에 속해 있다면
-        messages.forEach(message -> {
+        for (MessageEntity message : messages) {
             if (!message.isRead() && !message.getSender().getId().equals(currentUser.getId())) {
                 message.setRead(true);
                 messageRepository.save(message); // 메시지 상태 갱신
+                hasNewMessages = true;
             }
-        });
+        }
 
         // 사용자의 모든 읽지 않은 메시지 개수를 계산
         Long unreadMessageCount = messageRepository.countUnreadMessagesForUser(currentUser.getId());
@@ -316,11 +320,14 @@ public class ChatRoomService {
         chatRoomDTO.setMessages(messageDTOs);
         chatRoomDTO.setUnreadMessageCount(unreadMessageCount);
 
-        // 체팅방 리스트 조회
-        List<ChatRoomDTO> updatedChatRoomList = getActiveChatRoomList(principal);
+        // 새로운 메시지가 있을 경우에만 메시지 전송
+        if (hasNewMessages) {
+            // 체팅방 리스트 조회
+            List<ChatRoomDTO> updatedChatRoomList = getActiveChatRoomList(principal);
 
-        messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), unreadMessageCount);
-        messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), updatedChatRoomList);
+            messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), unreadMessageCount);
+            messagingTemplate.convertAndSend("/sub/chatRoomList/" + currentUser.getEmail(), updatedChatRoomList);
+        }
 
         return chatRoomDTO;
     }
