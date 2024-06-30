@@ -25,9 +25,7 @@ public class StoryEntity extends BaseEntity{
     @Column(name = "story_id")
     private Long id;
 
-    private String storyVideo;
-
-    private String storyImage;
+    private String storyText;
 
     private String storyType;
 
@@ -40,17 +38,18 @@ public class StoryEntity extends BaseEntity{
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StoryReadEntity> reads = new HashSet<>();
 
-    // 게시물과 이미지는 일대다 관계
+    // 스토리와 이미지는 일대다 관계
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageEntity> imageList = new ArrayList<>();
 
-    // 게시물과 동영상은 일대다 관계
+    // 스토리와 동영상은 일대다 관계
     @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VideoEntity> videoList = new ArrayList<>();
 
     // DTO -> Entity
     public static StoryEntity toEntity(StoryDTO dto) {
         return StoryEntity.builder()
+                .storyText(dto.getStoryText())
                 .storyType(dto.getStoryType())
                 .imageList(new ArrayList<>())
                 .videoList(new ArrayList<>())
@@ -61,17 +60,5 @@ public class StoryEntity extends BaseEntity{
     public void addRead(StoryReadEntity storyRead) {
         reads.add(storyRead);
         storyRead.setStory(this);
-    }
-
-    // 이미지 추가 메서드
-    public void addImage(ImageEntity imageEntity) {
-        imageList.add(imageEntity);
-        imageEntity.setStory(this);
-    }
-
-    // 비디오 추가 메서드
-    public void addVideo(VideoEntity videoEntity) {
-        videoList.add(videoEntity);
-        videoEntity.setStory(this);
     }
 }

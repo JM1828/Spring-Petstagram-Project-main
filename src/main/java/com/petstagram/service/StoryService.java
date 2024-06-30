@@ -42,6 +42,7 @@ public class StoryService {
 
         // DTO -> Entity
         StoryEntity storyEntity = StoryEntity.toEntity(storyDTO);
+        userEntity.addStory(storyEntity);
         storyEntity.setUser(userEntity);
 
         // 파일 업로드 처리
@@ -55,11 +56,13 @@ public class StoryService {
                         if (contentType.startsWith("image/")) {
                             ImageEntity imageEntity = new ImageEntity();
                             imageEntity.setImageUrl(fileName);
-                            storyEntity.addImage(imageEntity);
+                            imageEntity.setStory(storyEntity);
+                            storyEntity.getImageList().add(imageEntity);
                         } else if (contentType.startsWith("video/")) {
                             VideoEntity videoEntity = new VideoEntity();
                             videoEntity.setVideoUrl(fileName);
-                            storyEntity.addVideo(videoEntity);
+                            videoEntity.setStory(storyEntity);
+                            storyEntity.getVideoList().add(videoEntity);
                         }
                     }
                 }

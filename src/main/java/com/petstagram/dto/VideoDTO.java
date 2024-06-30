@@ -11,6 +11,7 @@ public class VideoDTO {
     private String videoUrl;
     private Long postId;
     private Long messageId;
+    private Long storyId;
 
     public static VideoDTO toDTO(VideoEntity videoEntity) {
         VideoDTO videoDTO = new VideoDTO();
@@ -18,6 +19,9 @@ public class VideoDTO {
         videoDTO.setVideoUrl(videoEntity.getVideoUrl());
         if (videoEntity.getPost() != null) {
             videoDTO.setPostId(videoEntity.getPost().getId());
+        }
+        if (videoEntity.getStory() != null) {
+            videoDTO.setStoryId(videoEntity.getStory().getId());
         }
         if (videoEntity.getMessage() != null) {
             videoDTO.setMessageId(videoEntity.getMessage().getId());

@@ -11,6 +11,7 @@ public class ImageDTO {
     private String imageUrl;
     private Long postId;
     private Long messageId;
+    private Long storyId;
 
     public static ImageDTO toDTO(ImageEntity imageEntity) {
         ImageDTO imageDTO = new ImageDTO();
@@ -18,6 +19,9 @@ public class ImageDTO {
         imageDTO.setImageUrl(imageEntity.getImageUrl());
         if (imageEntity.getPost() != null) {
             imageDTO.setPostId(imageEntity.getPost().getId());
+        }
+        if (imageEntity.getStory() != null) {
+            imageDTO.setStoryId(imageEntity.getStory().getId());
         }
         if (imageEntity.getMessage() != null) {
             imageDTO.setMessageId(imageEntity.getMessage().getId());

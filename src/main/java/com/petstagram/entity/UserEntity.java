@@ -74,6 +74,12 @@ public class UserEntity implements UserDetails {
         post.setUser(this);
     }
 
+    // 스토리 관련 메서드
+    public void addStory(StoryEntity story) {
+        storyList.add(story);
+        story.setUser(this);
+    }
+
     // 댓글 관련 메서드
     public void addComment(CommentEntity comment) {
         commentList.add(comment);
