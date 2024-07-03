@@ -1,12 +1,13 @@
 package com.petstagram.controller;
 
-import com.petstagram.dto.KakaoTokenDto;
 import com.petstagram.dto.UserDTO;
-import com.petstagram.entity.UserEntity;
 import com.petstagram.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor

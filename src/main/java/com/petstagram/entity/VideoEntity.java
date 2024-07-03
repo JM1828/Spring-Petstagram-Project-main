@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @Table(name = "videos")
-public class VideoEntity {
+public class VideoEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

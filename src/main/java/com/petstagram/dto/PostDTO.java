@@ -24,6 +24,7 @@ public class PostDTO {
     private List<ImageDTO> imageList;
     private List<VideoDTO> videoList;
     private List<CommentDTO> commentList;
+    private List<String> hashtags;
 
     private boolean postLiked;
     private long postLikesCount;
@@ -46,6 +47,9 @@ public class PostDTO {
                         .collect(Collectors.toList()))
                 .commentList(postEntity.getCommentList().stream()
                         .map(CommentDTO::toDTO)
+                        .collect(Collectors.toList()))
+                .hashtags(postEntity.getPostHashTags().stream()
+                        .map(postHashTag -> postHashTag.getHashtag().getName())
                         .collect(Collectors.toList()))
                 .build();
     }

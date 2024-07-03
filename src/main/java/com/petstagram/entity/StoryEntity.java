@@ -1,7 +1,6 @@
 package com.petstagram.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.petstagram.dto.PostDTO;
 import com.petstagram.dto.StoryDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "stories")
-public class StoryEntity extends BaseEntity{
+public class StoryEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +27,8 @@ public class StoryEntity extends BaseEntity{
     private String storyText;
 
     private String storyType;
+
+    private boolean storyExpired;
 
     // 스토리와 사용자는 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,6 +54,7 @@ public class StoryEntity extends BaseEntity{
                 .storyType(dto.getStoryType())
                 .imageList(new ArrayList<>())
                 .videoList(new ArrayList<>())
+                .storyExpired(false)
                 .build();
     }
 
@@ -61,4 +63,5 @@ public class StoryEntity extends BaseEntity{
         reads.add(storyRead);
         storyRead.setStory(this);
     }
+
 }

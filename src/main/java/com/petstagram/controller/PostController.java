@@ -1,5 +1,7 @@
 package com.petstagram.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petstagram.dto.PostDTO;
 import com.petstagram.dto.UserDTO;
 import com.petstagram.service.FileUploadService;
@@ -25,10 +27,16 @@ public class PostController {
     @PostMapping("/write")
     public ResponseEntity<String> writePost(@RequestPart("post") PostDTO postDTO,
                                             @RequestPart("file") List<MultipartFile> files,
-                                            @RequestPart(value = "breed", required = false) String breed) {
+                                            @RequestPart(value = "breed", required = false) String breed,
+                                            @RequestPart(value = "hashtags", required = false) String hashtagsJson) {
         try {
             postDTO.setBreed(breed);
-            postService.writePost(postDTO, files);
+            // 해시태그 JSON 문자열을 리스트로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> hashtags = objectMapper.readValue(hashtagsJson, new TypeReference<List<String>>() {});
+            System.out.println("해시태그 리스트: " + hashtags);
+
+            postService.writePost(postDTO, files, hashtags);
             return ResponseEntity.ok("게시글이 작성되었습니다.");
         } catch (Exception e) {
             log.error("파일 업로드 중 오류 발생", e);

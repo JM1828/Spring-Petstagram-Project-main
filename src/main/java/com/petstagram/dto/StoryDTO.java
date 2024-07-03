@@ -21,6 +21,8 @@ public class StoryDTO {
     private List<ImageDTO> imageList;
     private List<VideoDTO> videoList;
     private String storyType;
+    private UserDTO user;
+    private String regTime;
 
     // Entity -> DTO
     public static StoryDTO toDTO(StoryEntity storyEntity) {
@@ -33,6 +35,8 @@ public class StoryDTO {
                 .videoList(storyEntity.getVideoList().stream()
                         .map(VideoDTO::toDTO)
                         .collect(Collectors.toList()))
+                .user(UserDTO.toDTO(storyEntity.getUser()))
+                .regTime(storyEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
                 .build();
     }
 }

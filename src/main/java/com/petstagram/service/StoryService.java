@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,32 +25,29 @@ public class StoryService {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
 
-    // 현재 사용자의 스토리 조회
-    public List<StoryEntity> getUserStories() {
+    // 모든 스토리 조회
+    public List<StoryEntity> getAllStories() {
+        return storyRepository.findAllByStoryExpiredFalse();
+    }
 
-        // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 현재 로그인한 사용자의 이름을 DB 에서 가져옴
-        UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
-
-        return storyRepository.findByUser(userEntity);
+    // 특정 사용자의 스토리 조회
+    public List<StoryEntity> getUserStories(Long userId) {
+        return storyRepository.findByUserIdAndStoryExpiredFalse(userId);
     }
 
     // 스토리 저장
     @Transactional
     public void createStory(StoryDTO storyDTO, List<MultipartFile> files) {
 
-        // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity userEntity = userRepository.findByEmail(username)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
 
-        // 현재 로그인한 사용자의 이름을 DB 에서 가져옴
-        UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
-
-        // DTO -> Entity
         StoryEntity storyEntity = StoryEntity.toEntity(storyDTO);
         userEntity.addStory(storyEntity);
         storyEntity.setUser(userEntity);
+        storyEntity.setStoryExpired(false);
+        storyEntity.setRegTime(LocalDateTime.now());
 
         // 파일 업로드 처리
         if (files != null && !files.isEmpty()) {
@@ -83,10 +81,25 @@ public class StoryService {
     @Transactional
     public void markStoryAsRead(Long storyId, Long userId) {
         StoryEntity story = storyRepository.findById(storyId).orElseThrow(() -> new RuntimeException("Story not found"));
-        StoryReadEntity storyRead = new StoryReadEntity();
-        storyRead.setUserId(userId);
-        story.addRead(storyRead); // 연관관계 편의 메서드 사용
+        boolean alreadyRead = storyReadRepository.existsByStoryIdAndUserId(storyId, userId);
 
-        storyReadRepository.save(storyRead);
+        if (story.getUser().getId().equals(userId)) {
+            return;
+        }
+
+        if (!alreadyRead) {
+            StoryReadEntity storyRead = new StoryReadEntity();
+            storyRead.setUserId(userId);
+            storyRead.setStory(story);
+            storyReadRepository.save(storyRead);
+        }
+    }
+
+    public boolean isStoryRead(Long storyId, Long userId) {
+        return storyReadRepository.existsByStoryIdAndUserId(storyId, userId);
+    }
+
+    public List<StoryReadEntity> getUserReadStories(Long userId) {
+        return storyReadRepository.findByUserId(userId);
     }
 }

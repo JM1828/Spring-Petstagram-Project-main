@@ -4,10 +4,7 @@ package com.petstagram.service;
 import com.petstagram.dto.PostDTO;
 import com.petstagram.dto.UserDTO;
 import com.petstagram.entity.*;
-import com.petstagram.repository.NotificationRepository;
-import com.petstagram.repository.PostLikeRepository;
-import com.petstagram.repository.PostRepository;
-import com.petstagram.repository.UserRepository;
+import com.petstagram.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +26,10 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final NotificationRepository notificationRepository;
+    private final HashTagRepository hashTagRepository;
     private final FileUploadService fileUploadService;
     private final NotificationService notificationService;
+    private final ReplyCommentLikeRepository replyCommentLikeRepository;
 
     // 게시글 리스트 및 좋아요 개수 조회
     @Transactional(readOnly = true)
@@ -47,7 +48,8 @@ public class PostService {
     }
 
     // 게시글 작성
-    public void writePost(PostDTO dto, List<MultipartFile> files) {
+    @Transactional
+    public void writePost(PostDTO dto, List<MultipartFile> files, List<String> hashtagNames) {
         // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -83,6 +85,24 @@ public class PostService {
                         }
                     }
                 }
+            }
+        }
+
+        // 해시태그 처리 (중복 제거를 위해 Set 사용)
+        if (hashtagNames != null && !hashtagNames.isEmpty()) {
+            Set<String> uniqueHashtags = new HashSet<>(hashtagNames);
+            System.out.println("해시태그 리스트 (중복 제거 후): " + uniqueHashtags);
+
+            for (String name : uniqueHashtags) {
+                System.out.println("해시태그 처리 중: " + name);
+                HashTagEntity hashtag = hashTagRepository.findByName(name)
+                        .orElseGet(() -> {
+                            HashTagEntity newHashtag = new HashTagEntity();
+                            newHashtag.setName(name);
+                            return hashTagRepository.save(newHashtag);
+                        });
+                System.out.println("해시태그 저장됨: " + hashtag.getName());
+                postEntity.addHashtag(hashtag);
             }
         }
 

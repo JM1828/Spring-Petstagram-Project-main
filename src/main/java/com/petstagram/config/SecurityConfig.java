@@ -33,7 +33,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**", "/user/**", "/post/**", "/comment/**", "/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**", "/story/**").permitAll()
+                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**", "/user/**", "/post/**", "/comment/**", "/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**, ", "/story/**").permitAll()
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "USER")
                             .requestMatchers("/adminuser/**").hasAnyAuthority("ADMIN", "USER")
                             .anyRequest().authenticated();

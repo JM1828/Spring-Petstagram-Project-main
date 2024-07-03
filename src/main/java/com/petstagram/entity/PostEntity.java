@@ -53,6 +53,9 @@ public class PostEntity extends BaseEntity {
     @JsonIgnore
     private Set<PostLikeEntity> postLikeList = new HashSet<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostHashTagEntity> postHashTags = new HashSet<>();
+
     // DTO -> Entity
     public static PostEntity toEntity(PostDTO dto) {
         return PostEntity.builder()
@@ -62,6 +65,7 @@ public class PostEntity extends BaseEntity {
                 .imageList(new ArrayList<>())
                 .videoList(new ArrayList<>())
                 .commentList(new ArrayList<>())
+                .postHashTags(new HashSet<>())
                 .build();
     }
 
@@ -81,6 +85,13 @@ public class PostEntity extends BaseEntity {
     public void addVideo(VideoEntity videoEntity) {
         this.videoList.add(videoEntity);
         videoEntity.setPost(this);
+    }
+
+    public void addHashtag(HashTagEntity hashtagEntity) {
+        PostHashTagEntity postHashTagEntity = new PostHashTagEntity();
+        postHashTagEntity.setPost(this);
+        postHashTagEntity.setHashtag(hashtagEntity);
+        this.postHashTags.add(postHashTagEntity);
     }
 
     // 작성자 아이디를 가져오는 메서드
