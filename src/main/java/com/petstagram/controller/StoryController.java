@@ -18,10 +18,10 @@ public class StoryController {
 
     private final StoryService storyService;
 
-    // 모든 스토리 조회
+    // 현재 사용자의 스토리 조회
     @GetMapping
-    public ResponseEntity<List<StoryEntity>> getAllStories() {
-        List<StoryEntity> stories = storyService.getAllStories();
+    public ResponseEntity<List<StoryEntity>> getUserStories() {
+        List<StoryEntity> stories = storyService.getUserStories();
         return ResponseEntity.ok(stories);
     }
 

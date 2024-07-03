@@ -24,9 +24,16 @@ public class StoryService {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
 
-    // 모든 스토리 조회
-    public List<StoryEntity> getAllStories() {
-        return storyRepository.findAll();
+    // 현재 사용자의 스토리 조회
+    public List<StoryEntity> getUserStories() {
+
+        // 현재 인증된 사용자의 이름(또는 이메일 등의 식별 정보) 가져오기
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // 현재 로그인한 사용자의 이름을 DB 에서 가져옴
+        UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
+
+        return storyRepository.findByUser(userEntity);
     }
 
     // 스토리 저장
@@ -37,8 +44,7 @@ public class StoryService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // 현재 로그인한 사용자의 이름을 DB 에서 가져옴
-        UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
+        UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다. email = " + username));
 
         // DTO -> Entity
         StoryEntity storyEntity = StoryEntity.toEntity(storyDTO);
