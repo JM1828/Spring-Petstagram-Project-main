@@ -98,7 +98,8 @@ public class ChatRoomController {
 
         // 발신자가 채팅방에 있는 경우, 메시지를 읽음 처리
         if (senderActiveRoomId != null && senderActiveRoomId.equals(roomId)) {
-            chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, principal);
+            ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, principal);
+            messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, chatRoomDTO);
         } else {
             Long senderUnreadCount = updatedChatRoomListSender.stream()
                     .mapToLong(ChatRoomDTO::getUnreadMessageCount)
@@ -108,7 +109,8 @@ public class ChatRoomController {
 
         // 수신자가 채팅방에 있는 경우, 메시지를 읽음 처리
         if (receiverActiveRoomId != null && receiverActiveRoomId.equals(roomId)) {
-            chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, () -> receiverEmail);
+            ChatRoomDTO chatRoomDTO = chatRoomService.getChatRoomWithMessagesByIdAndMarkAsRead(roomId, () -> receiverEmail);
+            messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, chatRoomDTO);
         } else {
             Long receiverUnreadCount = updatedChatRoomListReceiver.stream()
                     .mapToLong(ChatRoomDTO::getUnreadMessageCount)

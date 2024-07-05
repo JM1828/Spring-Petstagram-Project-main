@@ -98,6 +98,7 @@ public class ChatRoomService {
         messageEntity.setSender(sender);
         messageEntity.setReceiver(receiver);
         messageEntity.setRegTime(LocalDateTime.now());
+        messageEntity.setRead(false);
 
         // 이미지 URL 을 저장
         if (messageDTO.getImageUrls() != null && !messageDTO.getImageUrls().isEmpty()) {

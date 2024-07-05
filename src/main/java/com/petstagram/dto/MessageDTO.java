@@ -29,6 +29,7 @@ public class MessageDTO {
     private String audioUrl;
     private List<VideoDTO> videoList; // 비디오 리스트
     private List<String> videoUrls;   // 비디오 URL 리스트
+    private boolean isRead = false;
 
     // Entity -> DTO
     public static MessageDTO toDTO(MessageEntity messageEntity) {
@@ -43,6 +44,7 @@ public class MessageDTO {
                 .receiverName(messageEntity.getReceiver().getName())
                 .receiverEmail(messageEntity.getReceiver().getEmail())
                 .regTime(messageEntity.getRegTime().format(DateTimeFormatter.ISO_DATE_TIME))
+                .isRead(messageEntity.isRead())
                 .imageList(messageEntity.getImageList().stream()
                         .map(ImageDTO::toDTO)
                         .collect(Collectors.toList()))
