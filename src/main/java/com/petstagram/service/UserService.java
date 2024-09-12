@@ -74,7 +74,6 @@ public class UserService {
         UserEntity user = userRepository.findByEmail(userDTO.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. 이메일: " + userDTO.getEmail()));
 
-
         // 조회된 사용자 정보를 바탕으로 JWT 토큰 생성
         String jwt = jwtUtils.generateToken(user);
 

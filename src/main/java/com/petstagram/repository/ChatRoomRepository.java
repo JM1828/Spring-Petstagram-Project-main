@@ -35,5 +35,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
             "LEFT JOIN FETCH cr.messages " +
             "WHERE cr.id = :chatRoomId")
     Optional<ChatRoomEntity> findChatRoomWithMessagesById(@Param("chatRoomId") Long chatRoomId);
-
 }

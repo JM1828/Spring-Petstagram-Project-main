@@ -33,9 +33,9 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final String KAKAO_CLIENT_ID = "89da2fcbd3e3d07bab5b5f6846a2fdb7";
-    private final String KAKAO_REDIRECT_URI = "http://localhost:5173/login/oauth2/callback/kakao";
-    private final String KAKAO_CLIENT_SECRET = "AA15FzZM5wOXSrF8E4f53TWOH8TqUy6V";
+    private final String KAKAO_CLIENT_ID = "";
+    private final String KAKAO_REDIRECT_URI = "";
+    private final String KAKAO_CLIENT_SECRET = "";
     private final UserRepository userRepository;
     private final JWTUtils jwtUtils;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
