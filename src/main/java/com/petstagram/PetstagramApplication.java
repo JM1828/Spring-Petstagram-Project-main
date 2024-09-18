@@ -35,7 +35,7 @@ public class PetstagramApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // 모든 경로에 대한 HTTP 요청을 처리
                         .allowedMethods("*") // 모든 http 메소드를 허용
-                        .allowedOrigins("http://13.125.42.51:80", "http://localhost:5173");
+                        .allowedOrigins("http://13.125.42.51:80");
             }
         };
     }

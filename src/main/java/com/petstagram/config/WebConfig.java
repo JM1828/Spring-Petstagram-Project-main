@@ -21,14 +21,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/uploads/**")
-                .allowedOrigins("http://localhost:8088", "http://13.125.42.51:80") // 두 출처 허용
+                .allowedOrigins("http://13.125.42.51:80") // 두 출처 허용
                 .allowedMethods("GET")
                 .allowedHeaders("*")
                 .allowCredentials(true);
 
         // SSE 요청에 대한 CORS 설정 추가
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173", "http://13.125.42.51:80") // 두 출처 허용
+                .allowedOrigins("http://13.125.42.51:80") // 두 출처 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
