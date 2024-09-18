@@ -20,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -33,7 +35,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**", "/user/**", "/post/**", "/comment/**", "/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**, ", "/story/**").permitAll()
+                    request.requestMatchers("/", "/oauth2/**", "/login/**", "/ws/**", "/sms/**", "/user/**", "/post/**", "/comment/**", "/public/**", "/uploads/**", "/subscribe/**", "/notificationList/**", "/report/**", "/story/**").permitAll()
                             .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "USER")
                             .requestMatchers("/adminuser/**").hasAnyAuthority("ADMIN", "USER")
                             .anyRequest().authenticated();
@@ -50,8 +52,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("http://13.125.42.51:80");
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://13.125.42.51:80")); // 한 줄로 설정
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
