@@ -27,9 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
 
         // SSE 요청에 대한 CORS 설정 추가
-        // 모든 경로에 대한 CORS 설정
         registry.addMapping("/**")
-                .allowedOrigins("http://13.125.42.51")
+                .allowedOrigins("http://13.125.42.51:8088") // 두 출처 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
